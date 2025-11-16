@@ -1,6 +1,22 @@
 # GitHub Sportscaster 🎙️
 
+[![Tests](https://github.com/OWASP-BLT/Github_Sportscaster/workflows/Tests/badge.svg)](https://github.com/OWASP-BLT/Github_Sportscaster/actions)
+[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 An AI-powered GitHub activity announcer that provides live sportscaster-style commentary on GitHub events. Watch repositories, organizations, and topics come alive with real-time play-by-play commentary, leaderboards, and visual displays!
+
+## 🚀 Quick Start
+
+**Want to get started right away?** See the [Quick Start Guide](QUICKSTART.md) for a 5-minute setup!
+
+```bash
+git clone https://github.com/OWASP-BLT/Github_Sportscaster.git
+cd Github_Sportscaster
+pip install -r requirements.txt
+cp .env.example .env  # Add your GitHub token
+python demo.py        # Try the demo
+```
 
 ## Features
 
@@ -101,6 +117,29 @@ channels:
 See `examples/config.yaml` for more detailed configuration examples.
 
 ## Usage
+
+### Docker Deployment (Recommended)
+
+The easiest way to run the sportscaster is with Docker:
+
+```bash
+# Create a config.yaml file (see examples/)
+cp examples/simple_config.yaml config.yaml
+
+# Set your GitHub token in .env
+echo "GITHUB_TOKEN=your_token_here" > .env
+
+# Run with docker-compose
+docker-compose up -d
+
+# View logs
+docker-compose logs -f
+
+# Stop
+docker-compose down
+```
+
+Then open `http://localhost:5000` in your browser!
 
 ### Run as Console Application
 
