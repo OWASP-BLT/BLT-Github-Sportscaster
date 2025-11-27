@@ -197,12 +197,15 @@ class AICommentary {
     }
 
     updateConfig(apiUrl, apiKey, model) {
-        this.apiUrl = apiUrl;
-        this.apiKey = apiKey;
-        this.model = model;
-        localStorage.setItem('ai_api_url', apiUrl);
-        localStorage.setItem('ai_api_key', apiKey);
-        localStorage.setItem('ai_model', model);
+        // Sanitize inputs before storing
+        this.apiUrl = (apiUrl || '').trim();
+        this.apiKey = (apiKey || '').trim();
+        this.model = (model || 'gpt-4o-mini').trim();
+        
+        // Only store in localStorage if values are provided
+        if (this.apiUrl) localStorage.setItem('ai_api_url', this.apiUrl);
+        if (this.apiKey) localStorage.setItem('ai_api_key', this.apiKey);
+        if (this.model) localStorage.setItem('ai_model', this.model);
     }
 
     getPrompt(event, leaderboard) {
@@ -225,8 +228,78 @@ ${topRepos}
 Generate exciting sports-style commentary for this GitHub event. Be energetic, use sports metaphors, and make it fun!`;
     }
 
+    /**
+     * Validates the API key format
+     * @param {string} key - The API key to validate
+     * @returns {boolean} - True if the key appears valid
+     */
+    isValidApiKey(key) {
+        if (!key || typeof key !== 'string') return false;
+        const trimmed = key.trim();
+        // Minimum length check for security
+        if (trimmed.length < 10 || trimmed.length > 500) return false;
+        // Allow alphanumeric, dashes, underscores, dots, and slashes (common in API keys)
+        // Also ensure no control characters or obvious injection attempts
+        const validPattern = /^[a-zA-Z0-9_\-./]+$/;
+        return validPattern.test(trimmed);
+    }
+
+    /**
+     * Validates the API URL format
+     * @param {string} url - The URL to validate
+     * @returns {boolean} - True if the URL appears valid
+     */
+    isValidApiUrl(url) {
+        if (!url || typeof url !== 'string') return false;
+        try {
+            const parsed = new URL(url);
+            return parsed.protocol === 'https:' || parsed.protocol === 'http:';
+        } catch {
+            return false;
+        }
+    }
+
+    /**
+     * Creates a fetch request with timeout
+     * @param {string} url - The URL to fetch
+     * @param {Object} options - Fetch options
+     * @param {number} timeout - Timeout in milliseconds
+     * @returns {Promise<Response>}
+     */
+    async fetchWithTimeout(url, options, timeout = 10000) {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), timeout);
+        
+        try {
+            const response = await fetch(url, {
+                ...options,
+                signal: controller.signal
+            });
+            return response;
+        } finally {
+            clearTimeout(timeoutId);
+        }
+    }
+
     async generateCommentary(event, leaderboard) {
-        if (!this.enabled || !this.apiUrl || !this.apiKey || this.isGenerating) {
+        // Check if AI commentary is enabled
+        if (!this.enabled) {
+            return this.generateFallbackCommentary(event, leaderboard);
+        }
+
+        // Check if already generating (prevent concurrent requests)
+        if (this.isGenerating) {
+            return this.generateFallbackCommentary(event, leaderboard);
+        }
+
+        // Validate API configuration
+        if (!this.isValidApiUrl(this.apiUrl)) {
+            console.warn('AI Commentary: Invalid or missing API URL');
+            return this.generateFallbackCommentary(event, leaderboard);
+        }
+
+        if (!this.isValidApiKey(this.apiKey)) {
+            console.warn('AI Commentary: Invalid or missing API key');
             return this.generateFallbackCommentary(event, leaderboard);
         }
 
@@ -234,11 +307,11 @@ Generate exciting sports-style commentary for this GitHub event. Be energetic, u
         this.showTypingIndicator();
 
         try {
-            const response = await fetch(this.apiUrl, {
+            const response = await this.fetchWithTimeout(this.apiUrl, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${this.apiKey}`
+                    'Authorization': `Bearer ${this.apiKey.trim()}`
                 },
                 body: JSON.stringify({
                     model: this.model,
@@ -249,7 +322,7 @@ Generate exciting sports-style commentary for this GitHub event. Be energetic, u
                     max_tokens: 100,
                     temperature: 0.8
                 })
-            });
+            }, 10000); // 10 second timeout
 
             if (!response.ok) {
                 throw new Error(`API error: ${response.status}`);
