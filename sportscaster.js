@@ -62,7 +62,7 @@ class SoundEffects {
         }
         
         // iOS/WebKit workaround: Play a silent buffer to unlock audio
-        if (!this.isUnlocked || this.isIOS) {
+        if (!this.isUnlocked) {
             this.playWarmUpBuffer();
             this.isUnlocked = true;
         }
@@ -847,20 +847,13 @@ class GitHubSportscaster {
      * Required for iOS (Safari, DuckDuckGo, etc.) to allow audio playback
      */
     setupGlobalAudioUnlock() {
-        const unlockAudio = () => {
-            // Unlock both sound effects and TTS on first interaction
+        // Listen for various user interaction events to unlock audio
+        const events = ['touchstart', 'touchend', 'mousedown', 'keydown'];
+        
+        const unlockHandler = () => {
+            // Unlock sound effects on first interaction
             this.soundEffects.resumeContext();
             // Note: TTS is unlocked when toggled, not here
-        };
-        
-        // Listen for various user interaction events
-        const events = ['touchstart', 'touchend', 'mousedown', 'keydown'];
-        const unlockHandler = () => {
-            unlockAudio();
-            // Remove listeners after first unlock
-            events.forEach(event => {
-                document.removeEventListener(event, unlockHandler);
-            });
         };
         
         events.forEach(event => {
