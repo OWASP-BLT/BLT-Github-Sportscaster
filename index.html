@@ -214,6 +214,27 @@
             font-size: 0.8em;
             color: #888;
             margin-top: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .view-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: rgba(255, 215, 0, 0.2);
+            color: #ffd700;
+            padding: 4px 10px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-size: 0.9em;
+            transition: all 0.2s ease;
+        }
+
+        .view-link:hover {
+            background: rgba(255, 215, 0, 0.4);
+            color: #fff;
         }
 
         .no-announcement {
@@ -223,254 +244,95 @@
             padding: 20px;
         }
 
-        /* Project Cards Grid Section */
-        .projects-section {
-            max-width: 1200px;
-            margin: 0 auto 30px;
-        }
-
-        .projects-header {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-
-        .projects-header h2 {
-            font-size: 1.8em;
-            margin-bottom: 5px;
-        }
-
-        .projects-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-            gap: 20px;
-        }
-
-        .project-card {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border-radius: 16px;
-            padding: 20px;
-            transition: all 0.3s ease;
-            border: 2px solid rgba(255, 255, 255, 0.2);
-        }
-
-        .project-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            border-color: rgba(255, 215, 0, 0.5);
-        }
-
-        .project-card.active {
-            border-color: rgba(255, 215, 0, 0.8);
-            box-shadow: 0 0 25px rgba(255, 215, 0, 0.4);
-        }
-
-        .project-header {
+        /* Compact Inline Stats for Event Items */
+        .event-stats {
             display: flex;
             align-items: center;
-            gap: 12px;
-            margin-bottom: 15px;
-        }
-
-        .project-rank {
-            background: linear-gradient(135deg, #ffd700, #ff8c00);
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            font-size: 1.1em;
-            color: #000;
+            gap: 8px;
+            margin-left: auto;
             flex-shrink: 0;
         }
 
-        .project-rank.top-3 {
-            box-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
-        }
-
-        .project-name {
-            flex-grow: 1;
-            min-width: 0;
-        }
-
-        .project-name a {
-            color: #fff;
-            text-decoration: none;
-            font-size: 1.2em;
-            font-weight: bold;
-            display: block;
-            word-break: break-all;
-        }
-
-        .project-name a:hover {
-            color: #ffd700;
-            text-decoration: underline;
-        }
-
-        .project-owner {
-            font-size: 0.85em;
-            opacity: 0.7;
-        }
-
-        /* Stats Grid */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-            margin-bottom: 15px;
-        }
-
-        .stat-box {
-            background: rgba(0, 0, 0, 0.2);
-            border-radius: 10px;
-            padding: 10px;
-            text-align: center;
-        }
-
-        .stat-value {
-            font-size: 1.4em;
-            font-weight: bold;
-            color: #fff;
-        }
-
-        .stat-label {
-            font-size: 0.7em;
-            opacity: 0.7;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        /* Event Type Breakdown */
-        .event-breakdown {
-            margin-top: 12px;
-        }
-
-        .event-breakdown-title {
-            font-size: 0.8em;
-            opacity: 0.7;
-            margin-bottom: 8px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .event-tags {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 6px;
-        }
-
-        .event-tag {
+        .stat-pill {
             display: inline-flex;
             align-items: center;
-            gap: 4px;
-            background: rgba(255, 255, 255, 0.15);
-            padding: 4px 10px;
-            border-radius: 15px;
-            font-size: 0.75em;
+            gap: 3px;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.7em;
         }
 
-        .event-tag-icon {
-            font-size: 1em;
+        .stat-pill-icon {
+            font-size: 0.9em;
         }
 
-        .event-tag-count {
+        .stat-pill-value {
             font-weight: bold;
             color: #ffd700;
         }
 
-        /* Activity Bar */
-        .activity-bar {
-            margin-top: 12px;
-        }
-
-        .activity-bar-title {
-            font-size: 0.8em;
-            opacity: 0.7;
-            margin-bottom: 5px;
+        /* Event Type Tags (compact) */
+        .event-type-tags {
             display: flex;
-            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 4px;
+            margin-top: 4px;
         }
 
-        .activity-bar-track {
-            height: 8px;
+        .mini-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 2px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 2px 6px;
+            border-radius: 8px;
+            font-size: 0.65em;
+        }
+
+        .mini-tag-count {
+            font-weight: bold;
+            color: #ffd700;
+        }
+
+        /* Activity mini-bar */
+        .mini-activity-bar {
+            width: 50px;
+            height: 4px;
             background: rgba(0, 0, 0, 0.3);
-            border-radius: 4px;
+            border-radius: 2px;
             overflow: hidden;
         }
 
-        .activity-bar-fill {
+        .mini-activity-fill {
             height: 100%;
-            background: linear-gradient(90deg, #48bb78, #ffd700, #ff6b6b);
-            border-radius: 4px;
-            transition: width 0.5s ease;
+            background: linear-gradient(90deg, #48bb78, #ffd700);
+            border-radius: 2px;
         }
 
-        /* Trending Indicator */
-        .trending-indicator {
+        /* Trending badge */
+        .trending-badge {
             display: inline-flex;
             align-items: center;
-            gap: 4px;
-            font-size: 0.8em;
-            padding: 3px 8px;
-            border-radius: 10px;
-            margin-left: 8px;
+            gap: 2px;
+            font-size: 0.7em;
+            padding: 2px 6px;
+            border-radius: 8px;
         }
 
-        .trending-up {
+        .trending-badge.up {
             background: rgba(72, 187, 120, 0.3);
             color: #48bb78;
         }
 
-        .trending-down {
+        .trending-badge.down {
             background: rgba(255, 107, 107, 0.3);
             color: #ff6b6b;
         }
 
-        .trending-stable {
-            background: rgba(255, 255, 255, 0.2);
-            color: #fff;
-        }
-
-        /* Recent Activity Timeline */
-        .recent-activity {
-            margin-top: 12px;
-            padding-top: 12px;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .recent-activity-title {
-            font-size: 0.8em;
-            opacity: 0.7;
-            margin-bottom: 8px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .activity-timeline {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-
-        .activity-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 0.8em;
-            opacity: 0.9;
-        }
-
-        .activity-item-icon {
-            width: 20px;
-            text-align: center;
-        }
-
-        .activity-item-time {
-            opacity: 0.6;
-            font-size: 0.9em;
-            margin-left: auto;
+        .trending-badge.new {
+            background: rgba(255, 215, 0, 0.3);
+            color: #ffd700;
         }
 
         /* Event List Section */
@@ -486,12 +348,9 @@
             background: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(10px);
             border-radius: 12px;
-            padding: 15px 20px;
+            padding: 12px 15px;
             transition: all 0.3s ease;
             border: 2px solid rgba(255, 255, 255, 0.2);
-            display: flex;
-            align-items: center;
-            gap: 15px;
         }
 
         .event-item:hover {
@@ -500,16 +359,22 @@
             border-color: rgba(255, 215, 0, 0.5);
         }
 
+        .event-item-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
         .event-number {
             background: rgba(255, 255, 255, 0.2);
-            width: 36px;
-            height: 36px;
+            width: 32px;
+            height: 32px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: bold;
-            font-size: 0.9em;
+            font-size: 0.8em;
             flex-shrink: 0;
         }
 
@@ -519,7 +384,7 @@
         }
 
         .event-repo-name {
-            font-size: 1.1em;
+            font-size: 1em;
             font-weight: bold;
             word-break: break-all;
         }
@@ -537,21 +402,21 @@
         .event-meta {
             display: flex;
             align-items: center;
-            gap: 10px;
-            margin-top: 5px;
+            gap: 8px;
+            margin-top: 3px;
             flex-wrap: wrap;
         }
 
         .event-type {
             display: inline-block;
             background: rgba(255, 255, 255, 0.2);
-            padding: 3px 8px;
+            padding: 2px 6px;
             border-radius: 5px;
-            font-size: 0.75em;
+            font-size: 0.7em;
         }
 
         .event-time {
-            font-size: 0.8em;
+            font-size: 0.75em;
             opacity: 0.7;
         }
 
@@ -620,30 +485,6 @@
             font-size: 0.9em;
         }
 
-        /* Section divider */
-        .section-divider {
-            max-width: 900px;
-            margin: 30px auto;
-            text-align: center;
-            position: relative;
-        }
-
-        .section-divider::before {
-            content: '';
-            position: absolute;
-            left: 0;
-            right: 0;
-            top: 50%;
-            height: 1px;
-            background: rgba(255, 255, 255, 0.2);
-        }
-
-        .section-divider span {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            padding: 0 20px;
-            position: relative;
-            font-size: 1.2em;
-            font-weight: bold;
         /* Rate Limit & Refresh Progress Styles */
         .api-status {
             max-width: 900px;
@@ -877,23 +718,11 @@
 
     <div class="loading pulse" id="loading">Loading GitHub activity...</div>
     <div class="error" id="error" style="display: none;"></div>
-
-    <!-- Project Cards Section -->
-    <div class="projects-section">
-        <div class="projects-header">
-            <h2>📊 Top Active Repositories</h2>
-        </div>
-        <div class="projects-grid" id="projects-grid"></div>
-    </div>
-
-    <div class="section-divider">
-        <span>📜 Event Timeline</span>
-    </div>
     
     <div class="list-container" id="event-list"></div>
 
     <div class="refresh-info">
-        Auto-refreshing every 30 seconds | 🔊 Click sound button to toggle audio
+        Auto-refreshing every 10 seconds | 🔊 Click sound button to toggle audio
     </div>
 
     <script>
@@ -1058,7 +887,6 @@
                 this.events = [];
                 this.repositories = new Map(); // Track stats per repository
                 this.maxEvents = 50;
-                this.maxProjectCards = 12; // Show top 12 repositories
                 this.totalEvents = 0;
                 this.updateInterval = 10000; // 10 seconds - optimal for fast updates
                 this.demoMode = false;
@@ -1091,6 +919,8 @@
                     // Resume audio context on user interaction
                     this.soundEffects.resumeContext();
                 });
+            }
+
             startCountdown() {
                 this.secondsUntilRefresh = this.updateInterval / 1000;
                 this.updateCountdownDisplay();
@@ -1228,7 +1058,6 @@
                     if (this.demoMode) {
                         events = this.getMockEvents();
                     } else {
-                        const response = await fetch('https://api.github.com/events');
                         // Build headers for conditional request
                         const headers = {};
                         if (this.etag) {
@@ -1345,8 +1174,7 @@
 
                 newEvents.sort((a, b) => b.createdAt - a.createdAt);
 
-                this.events = [...newEvents, ...this.events];
-                // Sort all events by date (newest first) for final list
+                // Merge new events with existing and sort
                 const allEvents = [...newEvents, ...this.events];
                 allEvents.sort((a, b) => b.createdAt - a.createdAt);
                 this.events = allEvents;
@@ -1518,6 +1346,33 @@
                 return { class: 'trending-stable', icon: '➡️', text: '—' };
             }
 
+            getEventUrl(event) {
+                // Generate a URL to the actual event on GitHub
+                const baseUrl = event.repoUrl;
+                switch (event.eventType) {
+                    case 'PushEvent':
+                        return `${baseUrl}/commits`;
+                    case 'PullRequestEvent':
+                        return `${baseUrl}/pulls`;
+                    case 'IssuesEvent':
+                        return `${baseUrl}/issues`;
+                    case 'ReleaseEvent':
+                        return `${baseUrl}/releases`;
+                    case 'ForkEvent':
+                        return `${baseUrl}/forks`;
+                    case 'WatchEvent':
+                        return `${baseUrl}/stargazers`;
+                    case 'CreateEvent':
+                    case 'DeleteEvent':
+                        return `${baseUrl}`;
+                    case 'IssueCommentEvent':
+                    case 'CommitCommentEvent':
+                        return `${baseUrl}/issues`;
+                    default:
+                        return baseUrl;
+                }
+            }
+
             updateAnnouncement() {
                 const announcementDiv = document.getElementById('announcement');
                 
@@ -1528,116 +1383,17 @@
 
                 const event = this.latestEvent;
                 const icon = this.getEventIcon(event.eventType);
+                const eventUrl = this.getEventUrl(event);
                 announcementDiv.innerHTML = `
                     <div class="announcement-event-type">${icon} ${this.escapeHtml(this.formatEventType(event.eventType))}</div>
                     <div class="announcement-repo">
                         <a href="${this.escapeHtml(event.repoUrl)}" target="_blank" rel="noopener noreferrer">${this.escapeHtml(event.repoName)}</a>
                     </div>
-                    <div class="announcement-time">by ${this.escapeHtml(event.actor)} • ${this.escapeHtml(this.formatTime(event.createdAt))}</div>
+                    <div class="announcement-time">
+                        <span>by ${this.escapeHtml(event.actor)} • ${this.escapeHtml(this.formatTime(event.createdAt))}</span>
+                        <a href="${this.escapeHtml(eventUrl)}" target="_blank" rel="noopener noreferrer" class="view-link">🔗 View</a>
+                    </div>
                 `;
-            }
-
-            renderProjectCards() {
-                const projectsGrid = document.getElementById('projects-grid');
-                
-                // Sort repositories by activity score
-                const sortedRepos = Array.from(this.repositories.values())
-                    .sort((a, b) => b.activityScore - a.activityScore)
-                    .slice(0, this.maxProjectCards);
-
-                // Store current ranks for next comparison
-                const newRanks = new Map();
-                sortedRepos.forEach((repo, index) => {
-                    newRanks.set(repo.name, index + 1);
-                });
-
-                projectsGrid.innerHTML = '';
-
-                sortedRepos.forEach((repo, index) => {
-                    const rank = index + 1;
-                    const trending = this.getTrendingIndicator(repo.name, rank);
-                    const [owner, repoShortName] = repo.name.split('/');
-                    const isActive = this.latestEvent && this.latestEvent.repoName === repo.name;
-                    const maxScore = sortedRepos[0]?.activityScore || 1;
-                    const activityPercent = Math.round((repo.activityScore / maxScore) * 100);
-
-                    const card = document.createElement('div');
-                    card.className = `project-card${isActive ? ' active' : ''}`;
-                    card.id = `project-${repo.name.replace('/', '-')}`;
-
-                    // Build event tags HTML
-                    const eventTagsHtml = Object.entries(repo.eventCounts)
-                        .sort((a, b) => b[1] - a[1])
-                        .slice(0, 5)
-                        .map(([type, count]) => `
-                            <span class="event-tag">
-                                <span class="event-tag-icon">${this.getEventIcon(type)}</span>
-                                <span class="event-tag-count">${count}</span>
-                            </span>
-                        `).join('');
-
-                    // Build recent activity HTML
-                    const recentActivityHtml = repo.recentEvents.slice(0, 3).map(evt => `
-                        <div class="activity-item">
-                            <span class="activity-item-icon">${this.getEventIcon(evt.type)}</span>
-                            <span>${this.escapeHtml(this.formatEventType(evt.type))} by ${this.escapeHtml(evt.actor)}</span>
-                            <span class="activity-item-time">${this.formatTime(evt.time)}</span>
-                        </div>
-                    `).join('');
-
-                    card.innerHTML = `
-                        <div class="project-header">
-                            <div class="project-rank${rank <= 3 ? ' top-3' : ''}">#${rank}</div>
-                            <div class="project-name">
-                                <a href="${this.escapeHtml(repo.url)}" target="_blank" rel="noopener noreferrer">${this.escapeHtml(repoShortName || repo.name)}</a>
-                                <div class="project-owner">${this.escapeHtml(owner || '')}</div>
-                            </div>
-                            <span class="trending-indicator ${trending.class}">${trending.icon} ${trending.text}</span>
-                        </div>
-                        
-                        <div class="stats-grid">
-                            <div class="stat-box">
-                                <div class="stat-value">${this.formatNumber(repo.totalEvents)}</div>
-                                <div class="stat-label">Events</div>
-                            </div>
-                            <div class="stat-box">
-                                <div class="stat-value">${repo.contributors.size}</div>
-                                <div class="stat-label">Contributors</div>
-                            </div>
-                            <div class="stat-box">
-                                <div class="stat-value">${this.formatNumber(repo.activityScore)}</div>
-                                <div class="stat-label">Activity Score</div>
-                            </div>
-                        </div>
-
-                        <div class="event-breakdown">
-                            <div class="event-breakdown-title">Event Types</div>
-                            <div class="event-tags">${eventTagsHtml}</div>
-                        </div>
-
-                        <div class="activity-bar">
-                            <div class="activity-bar-title">
-                                <span>Activity Level</span>
-                                <span>${activityPercent}%</span>
-                            </div>
-                            <div class="activity-bar-track">
-                                <div class="activity-bar-fill" style="width: ${activityPercent}%"></div>
-                            </div>
-                        </div>
-
-                        <div class="recent-activity">
-                            <div class="recent-activity-title">Recent Activity</div>
-                            <div class="activity-timeline">
-                                ${recentActivityHtml || '<div class="activity-item" style="opacity: 0.5;">No recent activity</div>'}
-                            </div>
-                        </div>
-                    `;
-
-                    projectsGrid.appendChild(card);
-                });
-
-                // Update previous ranks for next render
-                this.previousRanks = newRanks;
             }
 
             render() {
@@ -1646,18 +1402,19 @@
                 // Update sportscaster announcement
                 this.updateAnnouncement();
                 
-                // Render project cards
-                this.renderProjectCards();
-                
                 // Clear existing event list
                 listContainer.innerHTML = '';
 
                 // Sort events by date for display (newest first)
                 const sortedEvents = [...this.events].sort((a, b) => b.createdAt - a.createdAt);
 
+                // Calculate max score for activity bar scaling
+                const maxScore = Math.max(...Array.from(this.repositories.values()).map(r => r.activityScore), 1);
+
                 sortedEvents.forEach((event, index) => {
                     const isNew = this.newEventIds && this.newEventIds.has(event.id);
                     const icon = this.getEventIcon(event.eventType);
+                    const repo = this.repositories.get(event.repoName);
 
                     const item = document.createElement('div');
                     item.className = 'event-item';
@@ -1665,21 +1422,57 @@
 
                     if (isNew) {
                         item.classList.add('new-event', 'stagger-in');
-                        // Calculate stagger delay - random between 0-2 seconds
                         const staggerDelay = Math.random() * 2000;
                         item.style.animationDelay = `${staggerDelay}ms`;
                     }
 
+                    // Build compact stats HTML for this repo
+                    let statsHtml = '';
+                    if (repo) {
+                        const activityPercent = Math.round((repo.activityScore / maxScore) * 100);
+                        const trending = this.getTrendingIndicator(repo.name, index + 1);
+                        
+                        // Build mini event type tags (top 3)
+                        const eventTagsHtml = Object.entries(repo.eventCounts)
+                            .sort((a, b) => b[1] - a[1])
+                            .slice(0, 3)
+                            .map(([type, count]) => `<span class="mini-tag">${this.getEventIcon(type)}<span class="mini-tag-count">${count}</span></span>`)
+                            .join('');
+
+                        statsHtml = `
+                            <div class="event-stats">
+                                <span class="stat-pill" title="Total Events">
+                                    <span class="stat-pill-icon">📊</span>
+                                    <span class="stat-pill-value">${repo.totalEvents}</span>
+                                </span>
+                                <span class="stat-pill" title="Contributors">
+                                    <span class="stat-pill-icon">👥</span>
+                                    <span class="stat-pill-value">${repo.contributors.size}</span>
+                                </span>
+                                <span class="stat-pill" title="Activity Score">
+                                    <span class="stat-pill-icon">⚡</span>
+                                    <span class="stat-pill-value">${repo.activityScore}</span>
+                                </span>
+                                <div class="mini-activity-bar" title="Activity Level ${activityPercent}%">
+                                    <div class="mini-activity-fill" style="width: ${activityPercent}%"></div>
+                                </div>
+                            </div>
+                        `;
+                    }
+
                     item.innerHTML = `
-                        <div class="event-number">${index + 1}</div>
-                        <div class="event-details">
-                            <div class="event-repo-name">
-                                <a href="${this.escapeHtml(event.repoUrl)}" target="_blank" rel="noopener noreferrer">${this.escapeHtml(event.repoName)}</a>
+                        <div class="event-item-row">
+                            <div class="event-number">${index + 1}</div>
+                            <div class="event-details">
+                                <div class="event-repo-name">
+                                    <a href="${this.escapeHtml(event.repoUrl)}" target="_blank" rel="noopener noreferrer">${this.escapeHtml(event.repoName)}</a>
+                                </div>
+                                <div class="event-meta">
+                                    <span class="event-type">${icon} ${this.escapeHtml(this.formatEventType(event.eventType))}</span>
+                                    <span class="event-time">by ${this.escapeHtml(event.actor)} • ${this.escapeHtml(this.formatTime(event.createdAt))}</span>
+                                </div>
                             </div>
-                            <div class="event-meta">
-                                <span class="event-type">${icon} ${this.escapeHtml(this.formatEventType(event.eventType))}</span>
-                                <span class="event-time">by ${this.escapeHtml(event.actor)} • ${this.escapeHtml(this.formatTime(event.createdAt))}</span>
-                            </div>
+                            ${statsHtml}
                         </div>
                     `;
 
