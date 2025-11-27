@@ -546,8 +546,13 @@
             processEvents(events) {
                 const newEvents = [];
 
-                // Process events in reverse order so newest are first
+                // Process each event and collect new ones
                 events.forEach(event => {
+                    // Validate event structure before processing
+                    if (!event || !event.id || !event.repo || !event.repo.name || !event.type || !event.created_at) {
+                        return;
+                    }
+
                     const eventId = event.id;
                     
                     // Skip if we've already seen this event
