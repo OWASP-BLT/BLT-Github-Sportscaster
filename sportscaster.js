@@ -1443,6 +1443,48 @@ class GitHubSportscaster {
         return `${Math.floor(diff / 86400)}d ago`;
     }
 
+    formatCommitInfo(event) {
+        if (event.eventType !== 'PushEvent' || !event.payload || !event.payload.commits) {
+            return '';
+        }
+
+        const commits = event.payload.commits || [];
+        const commitCount = event.payload.size || commits.length;
+        
+        if (commitCount === 0) {
+            return '';
+        }
+
+        let html = '<div class="commit-info">';
+        html += `<div class="commit-count">📝 ${commitCount} commit${commitCount > 1 ? 's' : ''}</div>`;
+        
+        // Show up to 3 commit messages
+        const displayCommits = commits.slice(0, 3);
+        if (displayCommits.length > 0) {
+            html += '<div class="commit-list">';
+            displayCommits.forEach(commit => {
+                const shortSha = commit.sha ? commit.sha.substring(0, 7) : '';
+                const message = commit.message ? commit.message.split('\n')[0] : 'No message';
+                const commitUrl = commit.url || `${event.repoUrl}/commit/${commit.sha}`;
+                
+                html += '<div class="commit-item">';
+                if (shortSha) {
+                    html += `<a href="${this.escapeHtml(commitUrl)}" target="_blank" rel="noopener noreferrer" class="commit-sha">${this.escapeHtml(shortSha)}</a>`;
+                }
+                html += `<span class="commit-message">${this.escapeHtml(message)}</span>`;
+                html += '</div>';
+            });
+            html += '</div>';
+            
+            if (commits.length > 3) {
+                html += `<div class="commit-more">+ ${commits.length - 3} more commit${commits.length - 3 > 1 ? 's' : ''}</div>`;
+            }
+        }
+        
+        html += '</div>';
+        return html;
+    }
+
     getEventUrl(event) {
         const baseUrl = event.repoUrl;
         switch (event.eventType) {
@@ -1484,6 +1526,8 @@ class GitHubSportscaster {
         const event = this.latestEvent;
         const icon = this.getEventIcon(event.eventType);
         const eventUrl = this.getEventUrl(event);
+        const commitInfoHtml = this.formatCommitInfo(event);
+        
         announcementDiv.innerHTML = `
             <div class="announcement-event-type">${icon} ${this.escapeHtml(this.formatEventType(event.eventType))}</div>
             <div class="announcement-repo">
@@ -1493,6 +1537,7 @@ class GitHubSportscaster {
                 <span>by ${this.escapeHtml(event.actor)} • ${this.escapeHtml(this.formatTime(event.createdAt))}</span>
                 <a href="${this.escapeHtml(eventUrl)}" target="_blank" rel="noopener noreferrer" class="view-link">🔗 View</a>
             </div>
+            ${commitInfoHtml}
         `;
     }
 
@@ -1591,6 +1636,8 @@ class GitHubSportscaster {
                 `;
             }
 
+            const commitInfoHtml = this.formatCommitInfo(event);
+            
             item.innerHTML = `
                 <div class="event-item-row">
                     <div class="event-number">${index + 1}</div>
@@ -1602,6 +1649,7 @@ class GitHubSportscaster {
                             <span class="event-type">${icon} ${this.escapeHtml(this.formatEventType(event.eventType))}</span>
                             <span class="event-time">by ${this.escapeHtml(event.actor)} • ${this.escapeHtml(this.formatTime(event.createdAt))}</span>
                         </div>
+                        ${commitInfoHtml}
                     </div>
                     ${statsHtml}
                 </div>
