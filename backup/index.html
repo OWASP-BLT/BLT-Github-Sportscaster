@@ -1,0 +1,1479 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI GitHub Sportscaster - Live Play-by-Play</title>
+    <style>
+        * {
+
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #fff;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            background: linear-gradient(90deg, #ffd700, #ff6b6b, #48bb78);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .stats {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+
+        /* Top bar controls */
+        .top-bar {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+            z-index: 1000;
+        }
+
+        .top-bar-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5em;
+            transition: all 0.3s ease;
+            color: #fff;
+            text-decoration: none;
+        }
+
+        .top-bar-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1);
+        }
+
+        .top-bar-btn.muted,
+        .top-bar-btn.disabled {
+            opacity: 0.5;
+        }
+
+        .top-bar-btn.active {
+            background: rgba(72, 187, 120, 0.4);
+            border-color: rgba(72, 187, 120, 0.6);
+        }
+
+        /* Sportscaster Announcement Section */
+        .sportscaster-section {
+            max-width: 900px;
+            margin: 0 auto 30px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 20px;
+            padding: 20px;
+            border: 3px solid rgba(255, 215, 0, 0.6);
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.3);
+        }
+
+        .robot-container {
+            flex-shrink: 0;
+            width: 120px;
+            height: 140px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .robot-svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        @keyframes robot-talk {
+
+            0%,
+            100% {
+                transform: scaleY(1);
+            }
+
+            50% {
+                transform: scaleY(0.7);
+            }
+        }
+
+        .robot-mouth {
+            animation: robot-talk 0.3s ease-in-out infinite;
+            transform-origin: center;
+        }
+
+        @keyframes robot-blink {
+
+            0%,
+            90%,
+            100% {
+                transform: scaleY(1);
+            }
+
+            95% {
+                transform: scaleY(0.1);
+            }
+        }
+
+        .robot-eye {
+            animation: robot-blink 3s ease-in-out infinite;
+            transform-origin: center;
+        }
+
+        @keyframes antenna-glow {
+
+            0%,
+            100% {
+                fill: #ff4444;
+                filter: drop-shadow(0 0 5px #ff4444);
+            }
+
+            50% {
+                fill: #ffff00;
+                filter: drop-shadow(0 0 10px #ffff00);
+            }
+        }
+
+        .antenna-light {
+            animation: antenna-glow 1s ease-in-out infinite;
+        }
+
+        .tv-screen {
+            flex-grow: 1;
+            background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%);
+            border-radius: 15px;
+            padding: 20px;
+            border: 4px solid #333;
+            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.5), 0 0 15px rgba(100, 100, 255, 0.3);
+            position: relative;
+            overflow: hidden;
+            min-height: 120px;
+        }
+
+        .tv-screen::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: repeating-linear-gradient(0deg,
+                    rgba(0, 0, 0, 0.1) 0px,
+                    rgba(0, 0, 0, 0.1) 1px,
+                    transparent 1px,
+                    transparent 2px);
+            pointer-events: none;
+        }
+
+        .tv-label {
+            position: absolute;
+            top: 8px;
+            left: 12px;
+            font-size: 0.7em;
+            color: #ff4444;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        @keyframes live-pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.3;
+            }
+        }
+
+        .live-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: #ff4444;
+            border-radius: 50%;
+            margin-right: 5px;
+            animation: live-pulse 1s ease-in-out infinite;
+        }
+
+        .announcement-content {
+            margin-top: 15px;
+        }
+
+        .announcement-event-type {
+            font-size: 0.9em;
+            color: #ffd700;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .announcement-repo {
+            font-size: 1.4em;
+            font-weight: bold;
+            color: #fff;
+            overflow-wrap: break-word;
+        }
+
+        .announcement-repo a {
+            color: #fff;
+            text-decoration: none;
+        }
+
+        .announcement-repo a:hover {
+            text-decoration: underline;
+            color: #ffd700;
+        }
+
+        .announcement-time {
+            font-size: 0.8em;
+            color: #888;
+            margin-top: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .view-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: rgba(255, 215, 0, 0.2);
+            color: #ffd700;
+            padding: 4px 10px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-size: 0.9em;
+            transition: all 0.2s ease;
+        }
+
+        .view-link:hover {
+            background: rgba(255, 215, 0, 0.4);
+            color: #fff;
+        }
+
+        .no-announcement {
+            color: #888;
+            font-style: italic;
+            text-align: center;
+            padding: 20px;
+        }
+
+        /* Compact Inline Stats for Event Items */
+        .event-stats {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-left: auto;
+            flex-shrink: 0;
+        }
+
+        .stat-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.7em;
+        }
+
+        .stat-pill-icon {
+            font-size: 0.9em;
+        }
+
+        .stat-pill-value {
+            font-weight: bold;
+            color: #ffd700;
+        }
+
+        /* Event Type Tags (compact) */
+        .event-type-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            margin-top: 4px;
+        }
+
+        .mini-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 2px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 2px 6px;
+            border-radius: 8px;
+            font-size: 0.65em;
+        }
+
+        .mini-tag-count {
+            font-weight: bold;
+            color: #ffd700;
+        }
+
+        /* Activity mini-bar */
+        .mini-activity-bar {
+            width: 50px;
+            height: 4px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .mini-activity-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #48bb78, #ffd700);
+            border-radius: 2px;
+        }
+
+        /* Trending badge */
+        .trending-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 2px;
+            font-size: 0.7em;
+            padding: 2px 6px;
+            border-radius: 8px;
+        }
+
+        .trending-badge.up {
+            background: rgba(72, 187, 120, 0.3);
+            color: #48bb78;
+        }
+
+        .trending-badge.down {
+            background: rgba(255, 107, 107, 0.3);
+            color: #ff6b6b;
+        }
+
+        .trending-badge.new {
+            background: rgba(255, 215, 0, 0.3);
+            color: #ffd700;
+        }
+
+        /* Event List Section */
+        .list-container {
+            max-width: 900px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .event-item {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 12px 15px;
+            transition: all 0.3s ease;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .event-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+            border-color: rgba(255, 215, 0, 0.5);
+        }
+
+        .event-item-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .event-number {
+            background: rgba(255, 255, 255, 0.2);
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.8em;
+            flex-shrink: 0;
+        }
+
+        .event-details {
+            flex-grow: 1;
+            min-width: 0;
+        }
+
+        .event-repo-name {
+            font-size: 1em;
+            font-weight: bold;
+            overflow-wrap: break-word;
+        }
+
+        .event-repo-name a {
+            color: #fff;
+            text-decoration: none;
+        }
+
+        .event-repo-name a:hover {
+            text-decoration: underline;
+            color: #ffd700;
+        }
+
+        .event-meta {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 3px;
+            flex-wrap: wrap;
+        }
+
+        .event-type {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 2px 6px;
+            border-radius: 5px;
+            font-size: 0.7em;
+        }
+
+        .event-time {
+            font-size: 0.75em;
+            opacity: 0.7;
+        }
+
+        /* Slide in animation for new events */
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .event-item.new-event {
+            animation: slideIn 0.4s ease-out;
+            border-color: rgba(255, 215, 0, 0.8);
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.4);
+        }
+
+        /* Blink animation for new activity */
+        @keyframes blink {
+
+            0%,
+            100% {
+                background: rgba(255, 255, 255, 0.1);
+                border-color: rgba(255, 255, 255, 0.2);
+            }
+
+            50% {
+                background: rgba(255, 215, 0, 0.4);
+                border-color: rgba(255, 215, 0, 0.8);
+                box-shadow: 0 0 20px rgba(255, 215, 0, 0.6);
+            }
+        }
+
+        .blink {
+            animation: blink 0.6s ease-in-out 2;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            font-size: 1.5em;
+        }
+
+        .error {
+            text-align: center;
+            padding: 40px;
+            font-size: 1.2em;
+            color: #ff6b6b;
+        }
+
+        /* Pulse animation for loading */
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        .pulse {
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        .refresh-info {
+            text-align: center;
+            margin-top: 20px;
+            opacity: 0.8;
+            font-size: 0.9em;
+        }
+
+        /* Rate Limit & Refresh Progress Styles */
+        .api-status {
+            max-width: 900px;
+            margin: 0 auto 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 12px;
+            padding: 15px 20px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .api-status-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .rate-limit-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .rate-limit-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.9em;
+        }
+
+        .rate-limit-label {
+            opacity: 0.7;
+        }
+
+        .rate-limit-value {
+            font-weight: bold;
+            color: #48bb78;
+        }
+
+        .rate-limit-value.warning {
+            color: #ecc94b;
+        }
+
+        .rate-limit-value.danger {
+            color: #fc8181;
+        }
+
+        .refresh-countdown {
+            font-size: 0.9em;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .countdown-value {
+            font-weight: bold;
+            min-width: 25px;
+            text-align: right;
+        }
+
+        .progress-bar-container {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #48bb78, #38a169);
+            border-radius: 3px;
+            transition: width 0.3s ease;
+        }
+
+        .progress-bar.loading {
+            background: linear-gradient(90deg, #ecc94b, #d69e2e);
+            animation: pulse 0.5s ease-in-out infinite;
+        }
+
+        /* Speed Control Slider */
+        .speed-control {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .speed-control-label {
+            font-size: 0.85em;
+            opacity: 0.8;
+            white-space: nowrap;
+        }
+
+        .speed-slider {
+            flex-grow: 1;
+            -webkit-appearance: none;
+            appearance: none;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 3px;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .speed-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            background: #48bb78;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .speed-slider::-webkit-slider-thumb:hover {
+            background: #38a169;
+        }
+
+        .speed-slider::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            background: #48bb78;
+            border-radius: 50%;
+            cursor: pointer;
+            border: none;
+        }
+
+        .speed-value {
+            font-size: 0.85em;
+            font-weight: bold;
+            min-width: 40px;
+            text-align: right;
+        }
+
+        .auto-protect {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.8em;
+            margin-left: 10px;
+        }
+
+        .auto-protect input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+        }
+
+        .auto-protect-label {
+            opacity: 0.8;
+            cursor: pointer;
+        }
+
+        .rate-protected {
+            color: #ecc94b;
+            font-size: 0.8em;
+            margin-left: 5px;
+        }
+
+        /* Staggered event animation */
+        @keyframes staggerSlideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-30px) scale(0.95);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0) scale(1);
+            }
+        }
+
+        .event-item.stagger-in {
+            animation: staggerSlideIn 0.4s ease-out forwards;
+            opacity: 0;
+        }
+
+        /* Configuration Panel */
+        .config-panel {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            width: 320px;
+            background: rgba(20, 20, 40, 0.95);
+            border-radius: 15px;
+            padding: 20px;
+            border: 2px solid rgba(255, 215, 0, 0.4);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            display: none;
+            max-height: calc(100vh - 100px);
+            overflow-y: auto;
+        }
+
+        .config-panel.visible {
+            display: block;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .config-panel h3 {
+            font-size: 1.1em;
+            margin-bottom: 15px;
+            color: #ffd700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .config-group {
+            margin-bottom: 15px;
+        }
+
+        .config-group label {
+            display: block;
+            font-size: 0.85em;
+            margin-bottom: 5px;
+            opacity: 0.9;
+        }
+
+        .config-group input[type="text"],
+        .config-group select,
+        .config-group textarea {
+            width: 100%;
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            font-size: 0.9em;
+        }
+
+        .config-group input[type="text"]:focus,
+        .config-group select:focus,
+        .config-group textarea:focus {
+            outline: none;
+            border-color: rgba(255, 215, 0, 0.6);
+        }
+
+        .config-group textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+
+        .config-btn {
+            background: linear-gradient(90deg, #48bb78, #38a169);
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9em;
+            width: 100%;
+            transition: all 0.3s ease;
+        }
+
+        .config-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(72, 187, 120, 0.4);
+        }
+
+        .config-btn.secondary {
+            background: rgba(255, 255, 255, 0.2);
+            margin-top: 8px;
+        }
+
+        .preset-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 8px;
+        }
+
+        .preset-chip {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 4px 10px;
+            border-radius: 15px;
+            font-size: 0.75em;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+        }
+
+        .preset-chip:hover {
+            background: rgba(255, 215, 0, 0.3);
+            border-color: rgba(255, 215, 0, 0.5);
+        }
+
+        .preset-chip.active {
+            background: rgba(255, 215, 0, 0.4);
+            border-color: rgba(255, 215, 0, 0.6);
+        }
+
+        /* API Key Status Indicator */
+        .api-key-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 10px;
+            padding: 8px 12px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            font-size: 0.85em;
+        }
+
+        .status-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #888;
+            flex-shrink: 0;
+        }
+
+        .status-indicator.checking {
+            background: #ecc94b;
+            animation: pulse 1s ease-in-out infinite;
+        }
+
+        .status-indicator.connected {
+            background: #48bb78;
+            box-shadow: 0 0 8px rgba(72, 187, 120, 0.6);
+        }
+
+        .status-indicator.error {
+            background: #fc8181;
+            box-shadow: 0 0 8px rgba(252, 129, 129, 0.6);
+        }
+
+        .status-indicator.ready {
+            background: #63b3ed;
+            box-shadow: 0 0 8px rgba(99, 179, 237, 0.6);
+        }
+
+        .status-text {
+            color: #ccc;
+        }
+
+        .status-text.connected {
+            color: #48bb78;
+        }
+
+        .status-text.error {
+            color: #fc8181;
+        }
+
+        .status-text.checking {
+            color: #ecc94b;
+        }
+
+        .status-text.ready {
+            color: #63b3ed;
+        }
+
+        .test-connection-btn {
+            margin-top: 8px;
+            background: rgba(255, 255, 255, 0.15);
+            font-size: 0.85em;
+            padding: 8px 16px;
+        }
+
+        .test-connection-btn:hover {
+            background: rgba(255, 255, 255, 0.25);
+        }
+
+        .test-connection-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* AI Commentary Section */
+        .ai-commentary {
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(255, 107, 107, 0.1));
+            border-radius: 12px;
+            padding: 15px;
+            margin-top: 10px;
+            border: 1px solid rgba(255, 215, 0, 0.3);
+        }
+
+        .ai-commentary-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.8em;
+            color: #ffd700;
+            margin-bottom: 8px;
+        }
+
+        .ai-commentary-text {
+            font-size: 1em;
+            line-height: 1.5;
+            font-style: italic;
+            color: #fff;
+            min-height: 40px;
+        }
+
+        .ai-commentary-text.generating {
+            opacity: 0.6;
+        }
+
+        @keyframes typewriter {
+            from {
+                width: 0;
+            }
+
+            to {
+                width: 100%;
+            }
+        }
+
+        .typing-indicator {
+            display: inline-flex;
+            gap: 4px;
+            padding: 4px;
+        }
+
+        .typing-indicator span {
+            width: 6px;
+            height: 6px;
+            background: #ffd700;
+            border-radius: 50%;
+            animation: typingBounce 1.4s infinite ease-in-out;
+        }
+
+        .typing-indicator span:nth-child(1) {
+            animation-delay: -0.32s;
+        }
+
+        .typing-indicator span:nth-child(2) {
+            animation-delay: -0.16s;
+        }
+
+        @keyframes typingBounce {
+
+            0%,
+            80%,
+            100% {
+                transform: scale(0);
+            }
+
+            40% {
+                transform: scale(1);
+            }
+        }
+
+        /* Channel Filter Pills */
+        .channel-filters {
+            max-width: 900px;
+            margin: 0 auto 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .channel-filters-label {
+            font-size: 0.85em;
+            opacity: 0.8;
+            margin-right: 5px;
+        }
+
+        .channel-pill {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 2px solid transparent;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .channel-pill:hover {
+            background: rgba(255, 255, 255, 0.25);
+        }
+
+        .channel-pill.active {
+            background: rgba(72, 187, 120, 0.4);
+            border-color: rgba(72, 187, 120, 0.6);
+        }
+
+        .channel-pill .count {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-size: 0.8em;
+        }
+
+        /* Leaderboard Section */
+        .leaderboard-section {
+            max-width: 900px;
+            margin: 0 auto 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            padding: 20px;
+            border: 2px solid rgba(255, 215, 0, 0.3);
+        }
+
+        .leaderboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .leaderboard-title {
+            font-size: 1.2em;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .leaderboard-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .leaderboard-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 15px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .leaderboard-item:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateX(5px);
+        }
+
+        .leaderboard-item.rank-1 {
+            background: linear-gradient(90deg, rgba(255, 215, 0, 0.3), rgba(255, 215, 0, 0.1));
+            border: 1px solid rgba(255, 215, 0, 0.4);
+        }
+
+        .leaderboard-item.rank-2 {
+            background: linear-gradient(90deg, rgba(192, 192, 192, 0.25), rgba(192, 192, 192, 0.1));
+            border: 1px solid rgba(192, 192, 192, 0.3);
+        }
+
+        .leaderboard-item.rank-3 {
+            background: linear-gradient(90deg, rgba(205, 127, 50, 0.25), rgba(205, 127, 50, 0.1));
+            border: 1px solid rgba(205, 127, 50, 0.3);
+        }
+
+        .leaderboard-rank {
+            font-size: 1.2em;
+            font-weight: bold;
+            width: 30px;
+            text-align: center;
+        }
+
+        .leaderboard-rank.gold {
+            color: #ffd700;
+        }
+
+        .leaderboard-rank.silver {
+            color: #c0c0c0;
+        }
+
+        .leaderboard-rank.bronze {
+            color: #cd7f32;
+        }
+
+        .leaderboard-repo {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .leaderboard-repo-name {
+            font-weight: bold;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .leaderboard-repo-name a {
+            color: #fff;
+            text-decoration: none;
+        }
+
+        .leaderboard-repo-name a:hover {
+            color: #ffd700;
+            text-decoration: underline;
+        }
+
+        .leaderboard-stats {
+            display: flex;
+            gap: 12px;
+            font-size: 0.85em;
+        }
+
+        .leaderboard-stat {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .leaderboard-change {
+            font-size: 0.9em;
+            padding: 3px 8px;
+            border-radius: 10px;
+        }
+
+        .leaderboard-change.up {
+            background: rgba(72, 187, 120, 0.3);
+            color: #48bb78;
+        }
+
+        .leaderboard-change.down {
+            background: rgba(255, 107, 107, 0.3);
+            color: #ff6b6b;
+        }
+
+        .leaderboard-change.new {
+            background: rgba(255, 215, 0, 0.3);
+            color: #ffd700;
+        }
+
+        @keyframes rankUp {
+            0% {
+                transform: translateY(10px);
+                opacity: 0;
+            }
+
+            50% {
+                transform: translateY(-5px);
+            }
+
+            100% {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .leaderboard-item.rank-changed {
+            animation: rankUp 0.5s ease-out;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .config-panel {
+                width: calc(100% - 40px);
+                right: 20px;
+                left: 20px;
+            }
+
+            .top-bar {
+                right: 10px;
+            }
+
+            .leaderboard-stats {
+                flex-wrap: wrap;
+                gap: 6px;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .sportscaster-section {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .robot-container {
+                width: 80px;
+                height: 100px;
+            }
+
+            .tv-screen {
+                width: 100%;
+            }
+
+            .announcement-repo {
+                font-size: 1.1em;
+            }
+
+            .projects-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .top-bar-btn {
+                width: 40px;
+                height: 40px;
+                font-size: 1.2em;
+            }
+
+            .channel-filters {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Top Bar Controls -->
+    <div class="top-bar">
+        <a class="top-bar-btn" href="https://github.com/OWASP-BLT/Github_Sportscaster" target="_blank"
+            rel="noopener noreferrer" title="View on GitHub">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                <path
+                    d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
+            </svg>
+        </a>
+        <button class="top-bar-btn" id="sound-toggle" title="Toggle Sound Effects">🔊</button>
+        <button class="top-bar-btn" id="tts-toggle" title="Toggle Text-to-Speech">🗣️</button>
+        <button class="top-bar-btn" id="ai-toggle" title="Toggle AI Commentary">🤖</button>
+        <button class="top-bar-btn" id="config-toggle" title="Settings">⚙️</button>
+    </div>
+
+    <!-- Configuration Panel -->
+    <div class="config-panel" id="config-panel">
+        <h3>⚙️ Configuration</h3>
+
+        <div class="config-group">
+            <label>Monitoring Scope</label>
+            <select id="scope-type">
+                <option value="global">🌍 All GitHub</option>
+                <option value="org">🏢 Organization</option>
+                <option value="repo">📦 Repository</option>
+                <option value="user">👤 User</option>
+            </select>
+        </div>
+
+        <div class="config-group" id="scope-value-group" style="display: none;">
+            <label>Scope Value <small>(e.g., "facebook" or "facebook/react")</small></label>
+            <input type="text" id="scope-value" placeholder="Enter org, repo, or username">
+        </div>
+
+        <div class="config-group">
+            <label>Filter by Event Types</label>
+            <div class="preset-chips" id="event-type-filters">
+                <span class="preset-chip active" data-type="all">All Events</span>
+                <span class="preset-chip" data-type="PushEvent">📤 Push</span>
+                <span class="preset-chip" data-type="PullRequestEvent">🔀 PR</span>
+                <span class="preset-chip" data-type="IssuesEvent">🐛 Issues</span>
+                <span class="preset-chip" data-type="WatchEvent">⭐ Stars</span>
+                <span class="preset-chip" data-type="ForkEvent">🍴 Forks</span>
+                <span class="preset-chip" data-type="ReleaseEvent">🎉 Release</span>
+            </div>
+        </div>
+
+        <div class="config-group">
+            <label>AI Commentary API (OpenAI-compatible)</label>
+            <input type="text" id="ai-api-url" placeholder="https://api.openai.com/v1/chat/completions" value="">
+            <input type="text" id="ai-api-key" placeholder="API Key (stored locally)" style="margin-top: 8px;">
+            <select id="ai-model" style="margin-top: 8px;">
+                <option value="gpt-4o-mini">gpt-4o-mini</option>
+                <option value="gpt-4o">gpt-4o</option>
+                <option value="o3-mini">o3-mini</option>
+                <option value="gpt-3.5-turbo">gpt-3.5-turbo</option>
+            </select>
+            <div class="api-key-status" id="api-key-status">
+                <span class="status-indicator" id="status-indicator"></span>
+                <span class="status-text" id="status-text">Not configured</span>
+            </div>
+            <button class="config-btn test-connection-btn" id="test-connection-btn" type="button">🔌 Test
+                Connection</button>
+        </div>
+
+        <div class="config-group">
+            <label>Preset Channels</label>
+            <div class="preset-chips">
+                <span class="preset-chip" data-preset="trending">🔥 Trending</span>
+                <span class="preset-chip" data-preset="web">🌐 Web Dev</span>
+                <span class="preset-chip" data-preset="ai">🤖 AI/ML</span>
+                <span class="preset-chip" data-preset="devops">🔧 DevOps</span>
+            </div>
+        </div>
+
+        <button class="config-btn" id="apply-config">Apply Configuration</button>
+        <button class="config-btn secondary" id="reset-config">Reset to Defaults</button>
+    </div>
+
+    <div class="header">
+        <h1>🎙️ AI GitHub Sportscaster</h1>
+        <p>Live play-by-play coverage of GitHub activity</p>
+    </div>
+
+    <div class="stats">
+        <span id="event-count">0</span> events processed |
+        <span id="repo-count">0</span> repositories tracked |
+        Last update: <span id="last-update">-</span>
+    </div>
+
+    <!-- Channel Filters -->
+    <div class="channel-filters" id="channel-filters">
+        <span class="channel-filters-label">📺 Channels:</span>
+        <span class="channel-pill active" data-channel="all">All Activity <span class="count"
+                id="all-count">0</span></span>
+        <span class="channel-pill" data-channel="hot">🔥 Hot <span class="count" id="hot-count">0</span></span>
+        <span class="channel-pill" data-channel="code">💻 Code <span class="count" id="code-count">0</span></span>
+        <span class="channel-pill" data-channel="social">👥 Social <span class="count" id="social-count">0</span></span>
+    </div>
+
+    <!-- Sportscaster Announcement Section -->
+    <div class="sportscaster-section" id="sportscaster">
+        <div class="robot-container">
+            <svg class="robot-svg" viewBox="0 0 100 120" xmlns="http://www.w3.org/2000/svg">
+                <!-- Antenna -->
+                <line x1="50" y1="10" x2="50" y2="25" stroke="#888" stroke-width="3" />
+                <circle class="antenna-light" cx="50" cy="7" r="5" fill="#ff4444" />
+
+                <!-- Head -->
+                <rect x="20" y="25" width="60" height="45" rx="10" fill="#4a5568" stroke="#2d3748" stroke-width="2" />
+
+                <!-- Eyes -->
+                <g class="robot-eye">
+                    <circle cx="35" cy="45" r="8" fill="#1a202c" />
+                    <circle cx="35" cy="45" r="5" fill="#48bb78" />
+                    <circle cx="37" cy="43" r="2" fill="#fff" />
+                </g>
+                <g class="robot-eye">
+                    <circle cx="65" cy="45" r="8" fill="#1a202c" />
+                    <circle cx="65" cy="45" r="5" fill="#48bb78" />
+                    <circle cx="67" cy="43" r="2" fill="#fff" />
+                </g>
+
+                <!-- Mouth/Speaker -->
+                <g class="robot-mouth">
+                    <rect x="35" y="58" width="30" height="8" rx="2" fill="#1a202c" />
+                    <line x1="40" y1="62" x2="45" y2="62" stroke="#48bb78" stroke-width="2" />
+                    <line x1="48" y1="62" x2="53" y2="62" stroke="#48bb78" stroke-width="2" />
+                    <line x1="56" y1="62" x2="61" y2="62" stroke="#48bb78" stroke-width="2" />
+                </g>
+
+                <!-- Neck -->
+                <rect x="40" y="70" width="20" height="10" fill="#718096" />
+
+                <!-- Body -->
+                <rect x="15" y="80" width="70" height="35" rx="8" fill="#4a5568" stroke="#2d3748" stroke-width="2" />
+
+                <!-- Chest display -->
+                <rect x="30" y="88" width="40" height="20" rx="3" fill="#1a202c" />
+                <text x="50" y="102" text-anchor="middle" fill="#48bb78" font-size="8"
+                    font-family="monospace">LIVE</text>
+
+                <!-- Arms -->
+                <rect x="5" y="82" width="10" height="25" rx="5" fill="#718096" />
+                <rect x="85" y="82" width="10" height="25" rx="5" fill="#718096" />
+            </svg>
+        </div>
+        <div class="tv-screen">
+            <div class="tv-label"><span class="live-indicator"></span>LIVE</div>
+            <div class="announcement-content" id="announcement">
+                <div class="no-announcement">Waiting for activity...</div>
+            </div>
+            <!-- AI Commentary Section -->
+            <div class="ai-commentary" id="ai-commentary" style="display: none;">
+                <div class="ai-commentary-header">
+                    🤖 AI Commentary
+                </div>
+                <div class="ai-commentary-text" id="ai-commentary-text">
+                    <div class="typing-indicator">
+                        <span></span><span></span><span></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Leaderboard Section -->
+    <div class="leaderboard-section" id="leaderboard-section">
+        <div class="leaderboard-header">
+            <div class="leaderboard-title">🏆 Activity Leaderboard</div>
+        </div>
+        <div class="leaderboard-list" id="leaderboard-list">
+            <!-- Leaderboard items will be inserted here -->
+        </div>
+    </div>
+
+    <!-- API Status & Refresh Progress -->
+    <div class="api-status" id="api-status">
+        <div class="api-status-header">
+            <div class="rate-limit-info">
+                <div class="rate-limit-item">
+                    <span class="rate-limit-label">API Requests:</span>
+                    <span class="rate-limit-value" id="rate-remaining">-</span>
+                    <span class="rate-limit-label">/ </span>
+                    <span class="rate-limit-value" id="rate-limit">-</span>
+                </div>
+                <div class="rate-limit-item">
+                    <span class="rate-limit-label">Resets in:</span>
+                    <span class="rate-limit-value" id="rate-reset">-</span>
+                </div>
+            </div>
+            <div class="refresh-countdown">
+                <span>Next refresh:</span>
+                <span class="countdown-value" id="countdown">-</span>
+                <span>s</span>
+            </div>
+        </div>
+        <div class="progress-bar-container">
+            <div class="progress-bar" id="progress-bar" style="width: 100%;"></div>
+        </div>
+        <div class="speed-control">
+            <span class="speed-control-label">Refresh Speed:</span>
+            <input type="range" class="speed-slider" id="speed-slider" min="5" max="60" value="10" step="5">
+            <span class="speed-value" id="speed-value">10s</span>
+            <div class="auto-protect">
+                <input type="checkbox" id="auto-protect" checked>
+                <label for="auto-protect" class="auto-protect-label"
+                    title="Automatically slow down when rate limit is low">Auto-protect</label>
+            </div>
+            <span class="rate-protected" id="rate-protected" style="display: none;">⚠️ Throttled</span>
+        </div>
+    </div>
+
+    <div class="loading pulse" id="loading">Loading GitHub activity...</div>
+    <div class="error" id="error" style="display: none;"></div>
+
+    <div class="list-container" id="event-list"></div>
+
+    <div class="refresh-info">
+        Use the slider to control refresh speed | 🔊 Sound | 🗣️ Text-to-Speech | 🤖 AI Commentary | ⚙️ Settings
+    </div>
+
+    <script src="sportscaster.js"></script>
+</body>
+
+</html>
