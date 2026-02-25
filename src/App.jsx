@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Settings, BarChart3, Radio, Terminal } from 'lucide-react';
+import { Settings, Sun, Moon, Volume2, VolumeX } from 'lucide-react';
 import Header from './components/Header';
 import Announcer from './components/Announcer';
 import Leaderboard from './components/Leaderboard';
@@ -8,6 +8,16 @@ import ActivityFeed from './components/ActivityFeed';
 import StatusPanel from './components/StatusPanel';
 import SettingsPanel from './components/SettingsPanel';
 import { useGitHubSportscaster } from './hooks/useGitHubSportscaster';
+
+const TICKER_ITEMS = [
+    'SYSTEM_STATUS: NOMINAL',
+    'UPLINK_STABILITY: 100%',
+    'NEURAL_LINK: ACTIVE',
+    'ENCRYPTION: AES-256',
+    'LATENCY: 12MS',
+    'COORDINATES: 37.7749° N, 122.4194° W',
+    'PROTOCOL: v4.2.0-BETA',
+];
 
 function App() {
     const {
@@ -18,34 +28,45 @@ function App() {
         aiCommentary,
         config,
         updateConfig,
-        isAIEnabled
+        isAIEnabled,
+        isTTSEnabled,
+        isSoundEnabled,
+        toggleSound,
+        isSpeaking,
+        mouthOpenLevel,
     } = useGitHubSportscaster();
 
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+    const [theme, setTheme] = useState(() => localStorage.getItem('sc-theme') || 'dark');
+
+    useEffect(() => {
+        document.documentElement.setAttribute('data-theme', theme);
+        localStorage.setItem('sc-theme', theme);
+    }, [theme]);
+
+    const toggleTheme = () => setTheme(t => t === 'dark' ? 'light' : 'dark');
 
     return (
-        <div className="min-h-screen relative font-sans selection:bg-blue-500/30 selection:text-white">
+        <div className="min-h-screen relative font-mono" style={{ backgroundColor: 'var(--bg-base)', color: 'var(--text-primary)' }}>
             {/* Background elements */}
-            <div className="fixed inset-0 bg-grid z-0 opacity-20 pointer-events-none" />
-            <div className="fixed top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
-                <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-600/10 blur-[120px] rounded-full animate-pulse" />
-                <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-indigo-600/10 blur-[120px] rounded-full animate-pulse" />
-            </div>
+            <div className="fixed inset-0 bg-grid z-0 opacity-100 pointer-events-none" />
 
-            <main className="relative z-10 max-w-[1600px] mx-auto px-6 py-10 lg:py-16">
+            <main className="relative z-10 max-w-[1700px] mx-auto px-8 py-10 pb-24">
                 <Header />
 
-                <div className="mt-16 space-y-12">
+                <div className="mt-12 space-y-12">
                     {/* Top Section: Main Broadcast Stage */}
                     <Announcer
                         announcement={announcement}
                         aiCommentary={aiCommentary}
                         isAIEnabled={isAIEnabled}
+                        isSpeaking={isSpeaking}
+                        mouthOpenLevel={mouthOpenLevel}
                     />
 
                     {/* Bottom Section: Telemetry & Rankings */}
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
-                        <div className="lg:col-span-3 space-y-8">
+                        <div className="lg:col-span-3">
                             <StatusPanel stats={stats} />
                         </div>
 
@@ -61,14 +82,59 @@ function App() {
             </main>
 
             {/* Global HUD Controls */}
-            <div className="fixed bottom-8 right-8 z-50 flex flex-col gap-4">
+            <div className="fixed bottom-10 right-10 z-50 flex flex-col gap-6">
+                {/* Audio Toggle (Critical for initializing AudioContext) */}
                 <motion.button
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.9 }}
-                    onClick={() => setIsSettingsOpen(true)}
-                    className="w-14 h-14 rounded-2xl bg-[#020617] border border-white/10 flex items-center justify-center shadow-premium hover:border-blue-500/50 transition-all group"
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={toggleSound}
+                    className="w-14 h-14 border flex items-center justify-center shadow-glow group relative transition-all"
+                    style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-subtle)' }}
+                    onMouseEnter={(e) => e.currentTarget.style.borderColor = 'var(--accent)'}
+                    onMouseLeave={(e) => e.currentTarget.style.borderColor = 'var(--border-subtle)'}
+                    title={isSoundEnabled ? 'Mute Sounds' : 'Enable Sounds'}
                 >
-                    <Settings className="w-6 h-6 text-slate-400 group-hover:text-blue-400 group-hover:rotate-90 transition-all duration-500" />
+                    <div className="absolute inset-0 border-t-2 border-l-2 w-2 h-2 -top-0.5 -left-0.5" style={{ borderColor: 'var(--accent)' }} />
+                    <div className="absolute inset-0 border-b-2 border-r-2 w-2 h-2 -bottom-0.5 -right-0.5 ml-auto mt-auto" style={{ borderColor: 'var(--accent)' }} />
+                    {isSoundEnabled ? (
+                        <Volume2 className="w-6 h-6" style={{ color: 'var(--accent)' }} />
+                    ) : (
+                        <VolumeX className="w-6 h-6 opacity-40" />
+                    )}
+                </motion.button>
+
+                {/* Theme Toggle */}
+                <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={toggleTheme}
+                    className="w-14 h-14 border flex items-center justify-center shadow-glow group relative transition-all"
+                    style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-subtle)' }}
+                    onMouseEnter={(e) => e.currentTarget.style.borderColor = 'var(--accent)'}
+                    onMouseLeave={(e) => e.currentTarget.style.borderColor = 'var(--border-subtle)'}
+                >
+                    <div className="absolute inset-0 border-t-2 border-l-2 w-2 h-2 -top-0.5 -left-0.5" style={{ borderColor: 'var(--accent)' }} />
+                    <div className="absolute inset-0 border-b-2 border-r-2 w-2 h-2 -bottom-0.5 -right-0.5 ml-auto mt-auto" style={{ borderColor: 'var(--accent)' }} />
+                    {theme === 'dark' ? (
+                        <Sun className="w-6 h-6" style={{ color: 'var(--accent)' }} />
+                    ) : (
+                        <Moon className="w-6 h-6" style={{ color: 'var(--accent)' }} />
+                    )}
+                </motion.button>
+
+                {/* Settings */}
+                <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => setIsSettingsOpen(true)}
+                    className="w-14 h-14 border flex items-center justify-center shadow-glow group relative transition-all"
+                    style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-subtle)' }}
+                    onMouseEnter={(e) => e.currentTarget.style.borderColor = 'var(--accent)'}
+                    onMouseLeave={(e) => e.currentTarget.style.borderColor = 'var(--border-subtle)'}
+                >
+                    <div className="absolute inset-0 border-t-2 border-l-2 w-2 h-2 -top-0.5 -left-0.5" style={{ borderColor: 'var(--accent)' }} />
+                    <div className="absolute inset-0 border-b-2 border-r-2 w-2 h-2 -bottom-0.5 -right-0.5 ml-auto mt-auto" style={{ borderColor: 'var(--accent)' }} />
+                    <Settings className="w-6 h-6 group-hover:rotate-90 transition-all duration-500" style={{ color: 'var(--accent)' }} />
                 </motion.button>
             </div>
 
@@ -85,19 +151,13 @@ function App() {
                 )}
             </AnimatePresence>
 
-            {/* Minimal Background Ticker */}
-            <div className="fixed bottom-0 left-0 w-full bg-blue-600/[0.03] border-t border-white/5 py-1.5 px-6 backdrop-blur-sm z-40 overflow-hidden">
-                <div className="flex items-center gap-12 animate-shimmer whitespace-nowrap">
-                    {[1, 2, 3].map(i => (
-                        <div key={i} className="flex items-center gap-4 text-[9px] font-mono text-slate-500 uppercase tracking-[0.3em]">
-                            <span className="text-blue-500/50">●</span>
-                            GLOBAL_UPLINK_HEALTH: NOMINAL
-                            <span className="text-blue-500/50">●</span>
-                            BUFFER_LATENCY: {Math.floor(Math.random() * 20 + 10)}ms
-                            <span className="text-blue-500/50">●</span>
-                            AI_NEURAL_STABILITY: 98.4%
-                            <span className="text-blue-500/50">●</span>
-                            LAST_SIG_POLL: {new Date().toLocaleTimeString()}
+            {/* Bottom Ticker */}
+            <div className="fixed bottom-0 left-0 w-full py-3 px-0 z-40 overflow-hidden border-t" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-subtle)' }}>
+                <div className="ticker-track">
+                    {[...TICKER_ITEMS, ...TICKER_ITEMS].map((item, i) => (
+                        <div key={i} className="flex items-center gap-6 mx-8 text-[10px] font-mono uppercase tracking-[0.4em] opacity-60 whitespace-nowrap">
+                            <span style={{ color: 'var(--accent)' }}>■</span>
+                            {item}
                         </div>
                     ))}
                 </div>

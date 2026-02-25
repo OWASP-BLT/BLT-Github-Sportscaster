@@ -1,170 +1,268 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Cpu, Terminal, Zap, Layers, ExternalLink } from 'lucide-react';
+import { Terminal, Zap, Layers, ExternalLink, Radio } from 'lucide-react';
 
-const Announcer = ({ announcement, aiCommentary, isAIEnabled }) => {
+const BotDisplay = ({ announcement, isSpeaking, mouthOpenLevel }) => {
+    const isTalking = isSpeaking;
+    const barHeights = [4, 8, 12, 10, 6];
+
+    return (
+        <div className="w-64 h-64 relative group">
+            {/* HUD Decoration around bot */}
+            <div className="absolute -inset-4 border pointer-events-none" style={{ borderColor: 'var(--border-subtle)', opacity: 0.1 }} />
+            <div className="absolute -top-4 -left-4 w-4 h-4 border-t-2 border-l-2" style={{ borderColor: 'var(--accent)', opacity: 0.4 }} />
+            <div className="absolute -bottom-4 -right-4 w-4 h-4 border-b-2 border-r-2" style={{ borderColor: 'var(--accent)', opacity: 0.4 }} />
+
+            <motion.svg
+                viewBox="0 0 100 100"
+                className="w-full h-full"
+                style={{ filter: 'drop-shadow(0 0 10px var(--accent-glow))' }}
+                animate={isSpeaking ? {
+                    x: [0, -1, 1, -1, 0],
+                    y: [0, 1, -1, 1, 0],
+                    filter: [
+                        'drop-shadow(0 0 10px var(--accent-glow))',
+                        'drop-shadow(-2px 0 0 rgba(255,0,122,0.4)) drop-shadow(2px 0 0 var(--accent-glow))',
+                        'drop-shadow(0 0 10px var(--accent-glow))'
+                    ]
+                } : {}}
+                transition={{ duration: 0.2, repeat: Infinity }}
+            >
+                {/* Scanner Backdrop */}
+                <rect x="15" y="15" width="70" height="70" fill="var(--bg-card-hover)" stroke="var(--border-subtle)" strokeWidth="0.5" />
+
+                {/* Head - Industrial Sharp Shape */}
+                <path d="M20,30 L80,30 L85,40 L85,70 L80,80 L20,80 L15,70 L15,40 Z" fill="var(--bg-surface)" stroke="var(--accent)" strokeWidth="1.5" />
+
+                {/* Secondary inner frame */}
+                <path d="M24,34 L76,34 L80,42 L80,68 L76,76 L24,76 L20,68 L20,42 Z" fill="var(--bg-base)" stroke="var(--border-subtle)" strokeWidth="0.8" />
+
+                {/* Multi-Lens Sensor Array (Replacing generic eyes) */}
+                <g transform="translate(28, 42)">
+                    {/* Main Lens */}
+                    <rect x="0" y="0" width="18" height="12" fill="var(--bg-surface)" stroke="var(--border-subtle)" strokeWidth="0.5" />
+                    <motion.rect
+                        x="2" y="2" width="14" height="8"
+                        fill="var(--accent)"
+                        animate={isSpeaking ? { opacity: [0.2, 1, 0.2], scale: [1, 1.05, 1] } : { opacity: 0.6 }}
+                        transition={{ duration: 0.1, repeat: Infinity }}
+                    />
+                    <circle cx="9" cy="6" r="1.5" fill="var(--text-primary)" opacity="0.4" />
+                </g>
+
+                <g transform="translate(54, 42)">
+                    {/* Secondary Sensors */}
+                    <rect x="0" y="0" width="18" height="5" fill="var(--bg-surface)" stroke="var(--border-subtle)" strokeWidth="0.5" />
+                    <motion.rect
+                        x="1" y="1" width="16" height="3"
+                        fill="#10b981"
+                        animate={{ opacity: [0.3, 0.8, 0.3] }}
+                        transition={{ duration: 2, repeat: Infinity }}
+                    />
+                    <rect x="0" y="7" width="8" height="5" fill="var(--bg-surface)" stroke="var(--border-subtle)" strokeWidth="0.5" />
+                    <rect x="10" y="7" width="8" height="5" fill="var(--bg-surface)" stroke="var(--border-subtle)" strokeWidth="0.5" />
+                    <motion.circle cx="4" cy="9.5" r="1" fill="#ef4444" animate={{ opacity: [0, 1, 0] }} transition={{ duration: 0.5, repeat: Infinity }} />
+                    <motion.circle cx="14" cy="9.5" r="1" fill="#ef4444" animate={{ opacity: [0, 1, 0] }} transition={{ duration: 0.5, repeat: Infinity, delay: 0.25 }} />
+                </g>
+
+                {/* Scanline overlay on face */}
+                <motion.rect
+                    x="15" y="30" width="70" height="2" fill="var(--accent)" opacity="0.1"
+                    animate={isTalking
+                        ? { y: [30, 80, 30], opacity: [0.1, 0.4, 0.1] }
+                        : { y: [30, 80, 30] }}
+                    transition={isTalking
+                        ? { duration: 1.5, repeat: Infinity, ease: "linear" }
+                        : { duration: 5, repeat: Infinity, ease: "linear" }}
+                />
+
+                {/* Mouth Slit */}
+                {/* <rect x="35" y="60" width="30" height="4" rx="2" fill="var(--bg-surface)" stroke="var(--border-subtle)" strokeWidth="0.5" /> */}
+
+                {/* Reactive Mouth Bars */}
+                <g transform="translate(37, 62)">
+                    {[0, 1, 2, 3, 4].map(i => {
+                        // h is higher when mouthOpenLevel is active, but always at least 4 when speaking
+                        const h = isSpeaking
+                            ? (mouthOpenLevel > 0 ? (mouthOpenLevel * 2) + 4 : 4)
+                            : (announcement ? 2 : 0);
+                        return (
+                            <motion.rect
+                                key={i}
+                                x={i * 5.5}
+                                y={-h / 4}
+                                width="3"
+                                height={h}
+                                rx="1.5"
+                                fill="var(--accent)"
+                                style={{ filter: isSpeaking ? `drop-shadow(0 0 ${h}px var(--accent-glow))` : 'none' }}
+                                animate={{ height: h, y: -h / 2 }}
+                                transition={{ duration: 0.1 }}
+                            />
+                        );
+                    })}
+                </g>
+
+                {/* Data Bars on Chest */}
+                {/* <g transform="translate(30, 72)">
+                    {[0, 1, 2, 3, 4, 5, 6].map(i => (
+                        <motion.rect
+                            key={i} x={i * 6} y={0} width="3" height="10"
+                            fill={isTalking ? "#ff007a" : "var(--accent)"}
+                            opacity={isTalking ? 1 : 0.1}
+                            animate={isTalking ? { height: [4, 10, 4], opacity: [0.5, 1, 0.5] } : { height: 4, opacity: 0.3 }}
+                            transition={{ duration: 0.15, repeat: Infinity, delay: i * 0.05 }}
+                        />
+                    ))}
+                </g> */}
+
+                {/* Antenna pulse */}
+                <line x1="50" y1="30" x2="50" y2="20" stroke="var(--accent)" strokeWidth="1" />
+                <motion.rect
+                    x="48" y="16" width="4" height="4"
+                    fill="var(--accent)"
+                    animate={isSpeaking ? { filter: ['brightness(1)', 'brightness(2)', 'brightness(1)'] } : {}}
+                    transition={{ duration: 0.3, repeat: Infinity }}
+                />
+            </motion.svg>
+        </div>
+    );
+};
+
+const Announcer = ({ announcement, aiCommentary, isAIEnabled, isSpeaking, mouthOpenLevel }) => {
     return (
         <section className="mb-16">
-            <div className="flex flex-col xl:flex-row gap-8 items-stretch">
-                {/* Advanced AI Unit Card */}
-                <div className="w-full xl:w-[320px] glass-panel p-8 flex flex-col items-center justify-between border-blue-500/20 shadow-glow relative overflow-hidden group">
-                    <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-blue-500 to-transparent opacity-50" />
-
-                    <div className="relative mb-8 pt-4">
-                        {/* Interactive AI Core SVG */}
-                        <div className="w-48 h-48 relative z-10 transition-transform duration-700 group-hover:scale-105">
-                            <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-[0_0_20px_rgba(59,130,246,0.5)]">
-                                {/* Outer Ring */}
-                                <motion.circle
-                                    cx="50" cy="50" r="45" fill="none" stroke="rgba(59,130,246,0.2)" strokeWidth="0.5" strokeDasharray="5,5"
-                                    animate={{ rotate: 360 }} transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-                                />
-                                {/* Inner Components */}
-                                <rect x="25" y="30" width="50" height="40" rx="8" fill="#0f172a" stroke="#3b82f6" strokeWidth="2" />
-                                <rect x="30" y="35" width="40" height="30" rx="4" fill="#020617" />
-
-                                {/* Eyes / Sensors */}
-                                <motion.circle
-                                    cx="40" cy="45" r="4" fill="#3b82f6"
-                                    animate={{ opacity: [0.4, 1, 0.4], scale: [1, 1.2, 1] }}
-                                    transition={{ duration: 3, repeat: Infinity }}
-                                />
-                                <motion.circle
-                                    cx="60" cy="45" r="4" fill="#3b82f6"
-                                    animate={{ opacity: [0.4, 1, 0.4], scale: [1, 1.2, 1] }}
-                                    transition={{ duration: 3, repeat: Infinity, delay: 0.5 }}
-                                />
-
-                                {/* Reactive Mouth / Spectrum */}
-                                <motion.g
-                                    animate={announcement ? { opacity: [1, 0.6, 1] } : { opacity: 0.3 }}
-                                >
-                                    {[0, 1, 2, 3, 4].map(i => (
-                                        <motion.rect
-                                            key={i}
-                                            x={40 + (i * 4)} y="55" width="2" height="4" rx="1" fill="#60a5fa"
-                                            animate={announcement ? { height: [4, 12, 4], y: [55, 51, 55] } : {}}
-                                            transition={{ duration: 0.3, repeat: Infinity, delay: i * 0.05 }}
-                                        />
-                                    ))}
-                                </motion.g>
-                            </svg>
-                        </div>
-                        {/* Background Orbitals */}
-                        <div className="absolute inset-0 flex items-center justify-center opacity-20 pointer-events-none">
-                            <div className="w-full h-full border border-blue-500/30 rounded-full animate-float" />
-                        </div>
+            <div className="flex flex-col xl:flex-row gap-0 items-stretch">
+                {/* ── Bot Module ── */}
+                <div className="w-full xl:w-[350px] tech-panel p-10 flex flex-col items-center justify-between border-r-0 corner-tl corner-bl">
+                    <div className="tech-header w-full" style={{ borderColor: 'var(--border-subtle)' }}>
+                        <span className="hud-dec">UNIT_SERIAL: CY-01</span>
+                        <Radio
+                            className={`w-4 h-4 transition-all ${isSpeaking ? 'animate-pulse' : ''}`}
+                            style={{
+                                color: isSpeaking ? 'var(--accent)' : 'var(--text-muted)',
+                                opacity: isSpeaking ? 1 : 0.4
+                            }}
+                        />
                     </div>
 
-                    <div className="w-full text-center space-y-4">
-                        <div className="space-y-1">
-                            <h4 className="text-base font-black tracking-widest text-blue-400">CORE_UNIT_BETA</h4>
-                            <p className="text-[11px] font-mono text-slate-500">NEURAL_ENGINE_STATUS: L3_ACTIVE</p>
+                    <BotDisplay
+                        announcement={announcement}
+                        isSpeaking={isSpeaking}
+                        mouthOpenLevel={mouthOpenLevel}
+                    />
+
+                    <div className="w-full mt-8 space-y-4">
+                        <div className="flex justify-between items-end">
+                            <div>
+                                <h4 className="text-sm font-bold uppercase tracking-widest opacity-80">Neural Status</h4>
+                                <div className="text-2xl font-black neon-text-cyan uppercase">LINK_ACTIVE</div>
+                            </div>
+                            <div className="text-right">
+                                <span className="hud-dec">Vocal_Node</span>
+                                <div className="text-[11px] font-bold opacity-60">FREQ: 44.1KHZ</div>
+                            </div>
                         </div>
-                        <div className="flex items-center justify-center gap-2 py-2 px-4 rounded-xl bg-blue-500/5 border border-blue-500/10">
-                            <div className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
-                            <span className="text-[11px] font-bold text-blue-400 uppercase tracking-widest">Processing_Data</span>
+
+                        <div className="h-1 w-full bg-surface-theme/30 overflow-hidden relative">
+                            <motion.div
+                                className="absolute h-full left-0 bg-accent-theme shadow-glow"
+                                style={{ backgroundColor: 'var(--accent)' }}
+                                animate={{ width: isSpeaking ? ['20%', '100%', '20%'] : '5%' }}
+                                transition={{ duration: 2, repeat: Infinity }}
+                            />
                         </div>
                     </div>
                 </div>
 
-                {/* Main Event Signal Panel */}
-                <div className="flex-grow broadcast-screen min-h-[450px] flex flex-col relative">
+                {/* ── Main Broadcast Module ── */}
+                <div className="flex-grow broadcast-screen min-h-[500px] flex flex-col relative corner-tr corner-br">
                     <div className="scanline" />
+                    <div className="absolute inset-0 pointer-events-none" style={{ background: 'linear-gradient(to bottom, var(--accent-glow), transparent)', opacity: 0.05 }} />
 
-                    {/* Panel UI Overlays */}
-                    <div className="absolute top-6 left-8 flex items-center gap-6 z-20">
-                        <div className="flex items-center gap-2">
-                            <Layers className="w-4 h-4 text-blue-400/50" />
-                            <span className="text-[11px] font-mono text-blue-400/40 uppercase tracking-widest">Layer_Event_01</span>
+                    {/* HUD Overlays */}
+                    <div className="absolute top-8 left-10 flex items-center gap-8 z-20">
+                        <div className="flex items-center gap-3">
+                            <Layers className="w-4 h-4 opacity-40" />
+                            <span className="hud-dec">Buffer_Stream: 0xA42</span>
                         </div>
-                        <div className="w-px h-3 bg-white/10" />
-                        <div className="flex items-center gap-2">
-                            <Zap className="w-4 h-4 text-yellow-400/50" />
-                            <span className="text-[11px] font-mono text-yellow-400/40 uppercase tracking-widest">Boost_Mode: v2</span>
+                        <div className="flex items-center gap-3">
+                            <Zap className="w-4 h-4 text-pink-500 opacity-40" />
+                            <span className="hud-dec">Glitch_Prot: OFF</span>
                         </div>
                     </div>
 
-                    <div className="flex-grow flex flex-col items-center justify-center text-center p-12 relative z-20">
+                    <div className="flex-grow flex flex-col items-center justify-center text-center p-16 relative z-20">
                         <AnimatePresence mode="wait">
                             {announcement ? (
                                 <motion.div
                                     key={announcement.id}
-                                    initial={{ opacity: 0, y: 30, filter: 'blur(10px)' }}
-                                    animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-                                    exit={{ opacity: 0, y: -30, filter: 'blur(10px)' }}
-                                    transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-                                    className="max-w-4xl space-y-10"
+                                    initial={{ opacity: 0, x: 20 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    exit={{ opacity: 0, x: -20 }}
+                                    className="max-w-4xl space-y-8 transform translate-y-8"
                                 >
-                                    <div className="inline-flex items-center gap-4 px-5 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 shadow-glow">
-                                        <div className="w-2 h-2 rounded-full bg-blue-400" />
-                                        <span className="text-[12px] font-black text-blue-400 uppercase tracking-[0.4em]">Incoming_{announcement.eventType}</span>
+                                    <div className="flex items-center justify-center gap-4">
+                                        <div className="w-16 h-[1px] opacity-30" style={{ backgroundColor: 'var(--accent)' }} />
+                                        <span className="text-base font-black uppercase tracking-[0.6em] animate-glitch" style={{ color: 'var(--accent)' }}>
+                                            Incoming Signal
+                                        </span>
+                                        <div className="w-16 h-[1px] opacity-30" style={{ backgroundColor: 'var(--accent)' }} />
                                     </div>
 
-                                    <div className="space-y-6">
-                                        <a
-                                            href={`https://github.com/${announcement.repoName}`}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="inline-block group"
-                                        >
-                                            <h2 className="text-5xl md:text-8xl font-black text-white tracking-tighter leading-[0.85] transition-all duration-500 group-hover:scale-[1.02]">
-                                                {announcement.repoName.split('/')[0]}
-                                                <span className="block text-blue-500 flex items-center justify-center gap-4">
-                                                    {announcement.repoName.split('/')[1]}
-                                                    <ExternalLink className="w-10 h-10 opacity-0 group-hover:opacity-100 transition-opacity" />
-                                                </span>
-                                            </h2>
-                                        </a>
-                                        <div className="flex items-center justify-center gap-6 text-sm font-mono text-slate-400">
-                                            <a
-                                                href={`https://github.com/${announcement.actor}`}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="hover:text-blue-400 transition-colors"
-                                            >
-                                                ACTOR: @{announcement.actor}
-                                            </a>
-                                            <span className="opacity-30">|</span>
-                                            <span>SIG_TIME: {new Date().toLocaleTimeString()}</span>
+                                    <div className="space-y-4">
+                                        <h2 className="text-6xl md:text-8xl font-black tracking-tighter leading-none" style={{ color: 'var(--text-primary)' }}>
+                                            {announcement.repoName.split('/')[0]}
+                                            <span className="block neon-text-cyan">
+                                                {announcement.repoName.split('/')[1]}
+                                            </span>
+                                        </h2>
+
+                                        <div className="flex items-center justify-center gap-8 pt-4">
+                                            <div className="text-left">
+                                                <span className="hud-dec">Actor</span>
+                                                <div className="text-lg font-bold" style={{ color: 'var(--text-primary)' }}>@{announcement.actor}</div>
+                                            </div>
+                                            <div className="w-[1px] h-8 opacity-20" style={{ backgroundColor: 'var(--accent)' }} />
+                                            <div className="text-left">
+                                                <span className="hud-dec">Event Type</span>
+                                                <div className="text-lg font-bold text-pink-500">{announcement.eventType.replace('Event', '')}</div>
+                                            </div>
                                         </div>
                                     </div>
 
                                     {isAIEnabled && (
-                                        <div className="pt-12 border-t border-white/5 space-y-5">
-                                            <div className="flex items-center justify-center gap-3 opacity-40">
-                                                <Terminal className="w-4 h-4" />
-                                                <span className="text-[11px] uppercase font-bold tracking-widest">Neural_Interpretation_Sequence</span>
-                                            </div>
-                                            <p className="text-2xl md:text-4xl font-bold text-white italic leading-snug max-w-3xl mx-auto selection:bg-blue-500/30">
-                                                “{aiCommentary || "Synthesizing event parameters for neural broadcast..."}”
+                                        <div className="pt-12 border-t border-white/10" style={{ borderColor: 'var(--border-subtle)' }}>
+                                            <p className="text-2xl font-bold italic leading-relaxed max-w-3xl mx-auto" style={{ color: 'var(--text-primary)', opacity: 0.9 }}>
+                                                "{aiCommentary || 'Synthesizing neural interpretation...'}"
                                             </p>
                                         </div>
                                     )}
                                 </motion.div>
                             ) : (
-                                <motion.div
-                                    initial={{ opacity: 0 }}
-                                    animate={{ opacity: 1 }}
-                                    className="flex flex-col items-center gap-8"
-                                >
-                                    <div className="w-24 h-px bg-gradient-to-r from-transparent via-blue-500 to-transparent animate-pulse" />
-                                    <p className="font-orbitron text-base tracking-[0.5em] text-blue-400/40 uppercase animate-pulse">Awaiting Uplink Stream...</p>
-                                    <div className="w-24 h-px bg-gradient-to-r from-transparent via-blue-500 to-transparent animate-pulse" />
+                                <motion.div className="flex flex-col items-center gap-4 opacity-40">
+                                    <Terminal className="w-8 h-8 animate-pulse" style={{ color: 'var(--accent)' }} />
+                                    <p className="text-xs uppercase tracking-[0.8em]" style={{ color: 'var(--accent)' }}>Wait for Uplink</p>
                                 </motion.div>
                             )}
                         </AnimatePresence>
                     </div>
 
-                    {/* Bottom Status Ticker Overlay */}
-                    <div className="py-3 px-10 border-t border-white/5 bg-white/[0.02] flex items-center justify-between text-[11px] font-mono text-slate-500 uppercase tracking-widest z-20">
-                        <div className="flex items-center gap-6">
-                            <span>BUFFER_SIG: 100%</span>
-                            <span>DATA_RATE: 4.2 MB/S</span>
+                    {/* Footer HUD */}
+                    <div className="py-4 px-12 border-t flex items-center justify-between z-20" style={{ borderColor: 'var(--border-subtle)' }}>
+                        <div className="flex gap-12">
+                            <div className="flex flex-col">
+                                <span className="hud-dec">Data_Rate</span>
+                                <span className="text-sm font-black tracking-widest">4.21 MB/s</span>
+                            </div>
+                            <div className="flex flex-col">
+                                <span className="hud-dec">Security</span>
+                                <span className="text-sm font-black tracking-widest text-emerald-500">ENCRYPTED</span>
+                            </div>
                         </div>
-                        <div className="flex items-center gap-6">
-                            <span>STATION: BLT_NEURAL_UPLINK</span>
-                            <span className="text-blue-500/50 font-bold">SYSTEM_NOMINAL_TRUE</span>
+                        <div className="text-right">
+                            <span className="hud-dec">Broadcast_Node</span>
+                            <div className="text-sm font-black tracking-widest opacity-80" style={{ color: 'var(--text-secondary)' }}>SF_DATA_CENTER_7</div>
                         </div>
                     </div>
                 </div>

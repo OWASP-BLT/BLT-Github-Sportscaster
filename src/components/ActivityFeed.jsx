@@ -5,20 +5,19 @@ import { GitCommit, GitPullRequest, Bookmark, Star, GitFork, Package, PlusCircle
 const ActivityFeed = ({ events = [] }) => {
     return (
         <div className="flex flex-col gap-6">
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-4">
-                    <div className="p-2.5 rounded-2xl bg-blue-500/10 border border-blue-500/20 shadow-glow">
-                        <Activity className="w-5 h-5 text-blue-400" />
+                    <div className="p-3 border transition-colors" style={{ borderColor: 'var(--border-subtle)', backgroundColor: 'var(--bg-card-hover)' }}>
+                        <Activity className="w-5 h-5" style={{ color: 'var(--accent)' }} />
                     </div>
                     <div>
-                        <h3 className="text-sm font-black font-orbitron tracking-widest text-slate-300">ACTIVITY_STREAM</h3>
-                        <p className="text-[10px] font-mono text-slate-500 uppercase">Real-time Global Uplink Feed</p>
+                        <h3 className="text-sm font-bold uppercase tracking-[0.4em] opacity-80">Data_Stream</h3>
+                        <div className="text-2xl font-bold uppercase" style={{ color: 'var(--text-primary)' }}>LIVE_UPLINK</div>
                     </div>
                 </div>
-                <div className="flex items-center gap-3">
-                    <span className="text-[10px] font-mono py-1 px-3 rounded-full bg-white/5 border border-white/10 text-slate-400">
-                        CACHE: {events.length}/50
-                    </span>
+                <div className="text-right">
+                    <span className="hud-dec">Cache_Depth</span>
+                    <div className="text-sm font-bold" style={{ color: 'var(--accent)' }}>{events.length}/50</div>
                 </div>
             </div>
 
@@ -29,61 +28,54 @@ const ActivityFeed = ({ events = [] }) => {
                             <motion.div
                                 key={event.id || index}
                                 layout
-                                initial={{ opacity: 0, scale: 0.95, y: 20 }}
-                                animate={{ opacity: 1, scale: 1, y: 0 }}
-                                exit={{ opacity: 0, scale: 0.9, x: -20 }}
-                                transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-                                className="glass-panel p-5 group hover:border-blue-500/30 flex items-center gap-5 relative overflow-hidden"
+                                initial={{ opacity: 0, scale: 0.98 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                exit={{ opacity: 0 }}
+                                className="tech-panel p-5 flex items-center gap-5 relative opacity-90 hover:opacity-100"
                             >
-                                <div className="absolute top-0 right-0 p-2 opacity-5">
-                                    <Box className="w-12 h-12 text-blue-500" />
-                                </div>
+                                {/* Event decoration line */}
+                                <div className="absolute left-0 top-0 bottom-0 w-[2px] opacity-20" style={{ backgroundColor: 'var(--accent)' }} />
 
-                                <div className="relative">
-                                    <div className="w-14 h-14 rounded-2xl bg-slate-900 border border-white/5 flex items-center justify-center text-blue-400 group-hover:bg-blue-500/20 group-hover:scale-110 group-hover:text-blue-300 transition-all duration-500">
+                                <div className="relative flex-shrink-0">
+                                    <div className="w-12 h-12 border flex items-center justify-center transition-colors" style={{ borderColor: 'var(--border-subtle)', color: 'var(--accent)', backgroundColor: 'var(--bg-card-hover)' }}>
                                         {getEventIcon(event.eventType)}
                                     </div>
-                                    <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 rounded-full border-4 border-[#020617]" />
                                 </div>
 
                                 <div className="flex-grow min-w-0">
-                                    <div className="flex justify-between items-start mb-2">
+                                    <div className="flex justify-between items-start mb-1">
                                         <a
                                             href={`https://github.com/${event.repoName}`}
                                             target="_blank"
                                             rel="noopener noreferrer"
-                                            className="text-base font-black text-slate-200 truncate hover:text-blue-400 transition-colors tracking-tight flex items-center gap-2 group/link"
+                                            className="text-sm font-bold truncate transition-colors uppercase tracking-tight"
+                                            style={{ color: 'var(--text-primary)' }}
+                                            onMouseEnter={(e) => e.target.style.color = 'var(--accent)'}
+                                            onMouseLeave={(e) => e.target.style.color = 'var(--text-primary)'}
                                         >
                                             {event.repoName}
-                                            <ExternalLink className="w-3.5 h-3.5 opacity-0 group-hover/link:opacity-100 transition-opacity" />
                                         </a>
-                                        <span className="text-[11px] font-mono text-slate-600 group-hover:text-blue-400/50">
+                                        <span className="hud-dec text-[10px] opacity-80">
                                             {new Date(event.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
                                         </span>
                                     </div>
 
-                                    <div className="flex items-center gap-5">
-                                        <div className="px-2.5 py-1 rounded-md bg-blue-500/10 border border-blue-500/20 text-[10px] font-black text-blue-400 uppercase tracking-widest">
+                                    <div className="flex items-center gap-3">
+                                        <div className="text-[11px] font-bold uppercase tracking-widest opacity-80" style={{ color: 'var(--text-secondary)' }}>
                                             {event.eventType.replace('Event', '')}
                                         </div>
-                                        <div className="text-[12px] text-slate-400 truncate">
-                                            by <a
-                                                href={`https://github.com/${event.actor}`}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="text-slate-200 font-bold hover:text-blue-400 transition-colors"
-                                            >
-                                                @{event.actor}
-                                            </a>
+                                        <div className="text-xs truncate breadcrumb flex items-center gap-1">
+                                            <span className="opacity-60">by</span>
+                                            <span className="font-bold border-b border-accent/20" style={{ color: 'var(--text-primary)' }}>@{event.actor}</span>
                                         </div>
                                     </div>
                                 </div>
                             </motion.div>
                         ))
                     ) : (
-                        <div className="col-span-full py-32 glass-panel flex flex-col items-center justify-center gap-6 opacity-20 border-dashed">
-                            <Box className="w-16 h-16 animate-bounce" />
-                            <p className="font-orbitron tracking-[0.4em] text-xs uppercase">Initializing Stream Matrix...</p>
+                        <div className="col-span-full py-24 tech-panel flex flex-col items-center justify-center gap-4 border-dashed opacity-40">
+                            <Box className="w-12 h-12 opacity-20" style={{ color: 'var(--accent)' }} />
+                            <p className="hud-dec animate-pulse">Initializing Neural Link...</p>
                         </div>
                     )}
                 </AnimatePresence>
@@ -93,7 +85,7 @@ const ActivityFeed = ({ events = [] }) => {
 };
 
 const getEventIcon = (type) => {
-    const props = { size: 24, strokeWidth: 1.5 };
+    const props = { size: 16, strokeWidth: 1.5 };
     switch (type) {
         case 'PushEvent': return <GitCommit {...props} />;
         case 'PullRequestEvent': return <GitPullRequest {...props} />;

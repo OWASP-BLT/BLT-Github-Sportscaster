@@ -1,71 +1,80 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Radio, Globe, Zap, ShieldCheck } from 'lucide-react';
+import { Terminal, Radio, Shield, Cpu, Activity } from 'lucide-react';
 
 const Header = () => {
     return (
-        <header className="relative w-full mb-12">
-            <div className="flex flex-col md:flex-row items-center justify-between gap-6 px-1">
-                <div className="flex items-center gap-6">
-                    {/* Brand Identity */}
-                    <motion.div
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        className="flex items-center gap-4"
-                    >
-                        <div className="relative">
-                            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center shadow-[0_0_30px_rgba(37,99,235,0.4)] relative z-10">
-                                <Radio className="w-8 h-8 text-white animate-pulse" />
-                            </div>
-                            <div className="absolute inset-0 bg-blue-500/20 blur-2xl rounded-full animate-pulse-live" />
-                        </div>
-                        <div>
-                            <h1 className="text-4xl font-black tracking-tighter neon-text leading-none mb-1">
-                                GITHUB <span className="text-white/90">SPORTSCASTER</span>
-                            </h1>
-                            <div className="flex items-center gap-2">
-                                <span className="text-[11px] font-mono font-bold text-slate-500 uppercase tracking-[0.4em] shimmer-text">
-                                    Neural_Broadcast_Protocol_v4.2
-                                </span>
-                            </div>
-                        </div>
-                    </motion.div>
+        <header className="flex flex-col md:flex-row items-center justify-between gap-8 mb-16 relative">
+            <div className="flex items-center gap-6">
+                <div className="relative group">
+                    {/* Industrial Geometric Brandmark */}
+                    <div className="w-16 h-16 tech-panel flex items-center justify-center relative overflow-hidden group-hover:border-accent-theme transition-all duration-500" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-subtle)' }}>
+                        {/* Corner Accents */}
+                        <div className="absolute top-0 left-0 w-2 h-2 border-t-2 border-l-2" style={{ borderColor: 'var(--accent)' }} />
+                        <div className="absolute bottom-0 right-0 w-2 h-2 border-b-2 border-r-2" style={{ borderColor: 'var(--accent)' }} />
+
+                        <svg viewBox="0 0 100 100" className="w-10 h-10">
+                            <motion.path
+                                d="M20,20 L80,20 L80,35 L35,35 L35,50 L80,50 L80,80 L20,80 L20,65 L65,65 L65,50 L20,50 Z"
+                                fill="none"
+                                stroke="var(--accent)"
+                                strokeWidth="4"
+                                initial={{ pathLength: 0 }}
+                                animate={{ pathLength: 1 }}
+                                transition={{ duration: 2, repeat: Infinity, repeatType: "reverse", ease: "easeInOut" }}
+                            />
+                            <rect x="45" y="45" width="10" height="10" fill="var(--accent)">
+                                <animate attributeName="opacity" values="0.2;1;0.2" dur="2s" repeatCount="indefinite" />
+                            </rect>
+                        </svg>
+
+                        <motion.div
+                            className="absolute inset-0"
+                            style={{ backgroundColor: 'var(--accent)', opacity: 0.05 }}
+                            animate={{ opacity: [0, 0.1, 0] }}
+                            transition={{ duration: 3, repeat: Infinity }}
+                        />
+                    </div>
                 </div>
 
-                {/* Status HUD */}
-                <motion.div
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    className="flex items-center gap-4"
-                >
-                    <div className="hidden lg:flex items-center gap-10 px-10 py-4 rounded-full glass-panel border border-white/10">
-                        <StatusItem icon={<Globe className="w-5 h-5 text-blue-400" />} label="Global Uplink" value="ACTIVE" />
-                        <div className="w-px h-8 bg-white/10" />
-                        <StatusItem icon={<Zap className="w-5 h-5 text-yellow-400" />} label="Latency" value="12ms" />
-                        <div className="w-px h-8 bg-white/10" />
-                        <StatusItem icon={<ShieldCheck className="w-5 h-5 text-emerald-400" />} label="Security" value="SECURE" />
+                <div className="space-y-1">
+                    <div className="flex items-center gap-3">
+                        <span className="px-3 py-1 font-black uppercase tracking-widest" style={{ backgroundColor: 'var(--accent)', color: 'var(--bg-base)', fontSize: '11px' }}>
+                            Live_Broadcast
+                        </span>
+                        <span className="hud-dec">Protocol_v4.2</span>
                     </div>
-
-                    <div className="flex items-center gap-4 px-6 py-3 rounded-2xl bg-red-500/10 border border-red-500/20 group cursor-default">
-                        <div className="w-3 h-3 rounded-full bg-red-500 animate-pulse shadow-[0_0_12px_rgba(239,68,68,0.6)]" />
-                        <span className="text-sm font-black text-red-500 uppercase tracking-widest group-hover:scale-105 transition-transform">SIGNAL_LIVE</span>
-                    </div>
-                </motion.div>
+                    <h1 className="text-6xl font-black tracking-[0.05em] uppercase leading-none" style={{ color: 'var(--text-primary)' }}>
+                        NEURAL<span style={{ color: 'var(--text-secondary)' }}>_UPLINK</span>
+                    </h1>
+                </div>
             </div>
 
-            {/* Ambient Line */}
-            <div className="absolute -bottom-6 left-0 w-full h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+            <div className="flex items-center gap-8">
+                <HeaderStat icon={<Activity className="text-emerald-500" />} label="Stream" status="NOMINAL" />
+                <HeaderStat icon={<Shield className="text-cyan-500" />} label="Auth" status="SECURE" />
+                <HeaderStat icon={<Cpu className="text-pink-500" />} label="Cores" status="L3_ACTIVE" />
+            </div>
+
+            {/* Top Border HUD */}
+            <div className="absolute -top-12 left-0 right-0 h-[1px] flex items-center justify-center" style={{ background: 'linear-gradient(to right, transparent, var(--accent), transparent)', opacity: 0.3 }}>
+                <div className="px-4 text-[10px] font-mono tracking-[1em] uppercase font-bold" style={{ backgroundColor: 'var(--bg-base)', color: 'var(--text-muted)' }}>
+                    Neural_Network_Handshake_Complete
+                </div>
+            </div>
         </header>
     );
 };
 
-const StatusItem = ({ icon, label, value }) => (
-    <div className="flex flex-col">
+const HeaderStat = ({ icon, label, status }) => (
+    <div className="flex flex-col items-end">
         <div className="flex items-center gap-2 mb-1">
-            {icon}
-            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{label}</span>
+            <span className="hud-dec">{label}</span>
+            <div className="opacity-60">{icon}</div>
         </div>
-        <span className="text-sm font-mono font-bold text-slate-200">{value}</span>
+        <div className="text-[11px] font-black tracking-widest border-r-2 pr-2" style={{ color: 'var(--text-primary)', borderColor: 'var(--accent)' }}>
+            {status}
+        </div>
     </div>
 );
 
