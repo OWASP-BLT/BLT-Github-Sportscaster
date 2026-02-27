@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI GitHub Sportscaster - Live Play-by-Play</title>
     <style>
         * {
-            margin: 0;
-            padding: 0;
+
             box-sizing: border-box;
         }
 
@@ -27,7 +27,7 @@
         .header h1 {
             font-size: 2.5em;
             margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
             background: linear-gradient(90deg, #ffd700, #ff6b6b, #48bb78);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -115,8 +115,15 @@
         }
 
         @keyframes robot-talk {
-            0%, 100% { transform: scaleY(1); }
-            50% { transform: scaleY(0.7); }
+
+            0%,
+            100% {
+                transform: scaleY(1);
+            }
+
+            50% {
+                transform: scaleY(0.7);
+            }
         }
 
         .robot-mouth {
@@ -125,8 +132,16 @@
         }
 
         @keyframes robot-blink {
-            0%, 90%, 100% { transform: scaleY(1); }
-            95% { transform: scaleY(0.1); }
+
+            0%,
+            90%,
+            100% {
+                transform: scaleY(1);
+            }
+
+            95% {
+                transform: scaleY(0.1);
+            }
         }
 
         .robot-eye {
@@ -135,8 +150,17 @@
         }
 
         @keyframes antenna-glow {
-            0%, 100% { fill: #ff4444; filter: drop-shadow(0 0 5px #ff4444); }
-            50% { fill: #ffff00; filter: drop-shadow(0 0 10px #ffff00); }
+
+            0%,
+            100% {
+                fill: #ff4444;
+                filter: drop-shadow(0 0 5px #ff4444);
+            }
+
+            50% {
+                fill: #ffff00;
+                filter: drop-shadow(0 0 10px #ffff00);
+            }
         }
 
         .antenna-light {
@@ -162,13 +186,11 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: repeating-linear-gradient(
-                0deg,
-                rgba(0, 0, 0, 0.1) 0px,
-                rgba(0, 0, 0, 0.1) 1px,
-                transparent 1px,
-                transparent 2px
-            );
+            background: repeating-linear-gradient(0deg,
+                    rgba(0, 0, 0, 0.1) 0px,
+                    rgba(0, 0, 0, 0.1) 1px,
+                    transparent 1px,
+                    transparent 2px);
             pointer-events: none;
         }
 
@@ -184,8 +206,15 @@
         }
 
         @keyframes live-pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.3; }
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.3;
+            }
         }
 
         .live-indicator {
@@ -372,7 +401,7 @@
 
         .event-item:hover {
             transform: translateX(5px);
-            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
             border-color: rgba(255, 215, 0, 0.5);
         }
 
@@ -443,6 +472,7 @@
                 opacity: 0;
                 transform: translateY(-20px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -457,11 +487,14 @@
 
         /* Blink animation for new activity */
         @keyframes blink {
-            0%, 100% { 
+
+            0%,
+            100% {
                 background: rgba(255, 255, 255, 0.1);
                 border-color: rgba(255, 255, 255, 0.2);
             }
-            50% { 
+
+            50% {
                 background: rgba(255, 215, 0, 0.4);
                 border-color: rgba(255, 215, 0, 0.8);
                 box-shadow: 0 0 20px rgba(255, 215, 0, 0.6);
@@ -487,8 +520,15 @@
 
         /* Pulse animation for loading */
         @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
         }
 
         .pulse {
@@ -674,6 +714,7 @@
                 opacity: 0;
                 transform: translateX(-30px) scale(0.95);
             }
+
             to {
                 opacity: 1;
                 transform: translateX(0) scale(1);
@@ -907,8 +948,13 @@
         }
 
         @keyframes typewriter {
-            from { width: 0; }
-            to { width: 100%; }
+            from {
+                width: 0;
+            }
+
+            to {
+                width: 100%;
+            }
         }
 
         .typing-indicator {
@@ -925,12 +971,25 @@
             animation: typingBounce 1.4s infinite ease-in-out;
         }
 
-        .typing-indicator span:nth-child(1) { animation-delay: -0.32s; }
-        .typing-indicator span:nth-child(2) { animation-delay: -0.16s; }
+        .typing-indicator span:nth-child(1) {
+            animation-delay: -0.32s;
+        }
+
+        .typing-indicator span:nth-child(2) {
+            animation-delay: -0.16s;
+        }
 
         @keyframes typingBounce {
-            0%, 80%, 100% { transform: scale(0); }
-            40% { transform: scale(1); }
+
+            0%,
+            80%,
+            100% {
+                transform: scale(0);
+            }
+
+            40% {
+                transform: scale(1);
+            }
         }
 
         /* Channel Filter Pills */
@@ -1046,9 +1105,17 @@
             text-align: center;
         }
 
-        .leaderboard-rank.gold { color: #ffd700; }
-        .leaderboard-rank.silver { color: #c0c0c0; }
-        .leaderboard-rank.bronze { color: #cd7f32; }
+        .leaderboard-rank.gold {
+            color: #ffd700;
+        }
+
+        .leaderboard-rank.silver {
+            color: #c0c0c0;
+        }
+
+        .leaderboard-rank.bronze {
+            color: #cd7f32;
+        }
 
         .leaderboard-repo {
             flex: 1;
@@ -1106,9 +1173,19 @@
         }
 
         @keyframes rankUp {
-            0% { transform: translateY(10px); opacity: 0; }
-            50% { transform: translateY(-5px); }
-            100% { transform: translateY(0); opacity: 1; }
+            0% {
+                transform: translateY(10px);
+                opacity: 0;
+            }
+
+            50% {
+                transform: translateY(-5px);
+            }
+
+            100% {
+                transform: translateY(0);
+                opacity: 1;
+            }
         }
 
         .leaderboard-item.rank-changed {
@@ -1172,12 +1249,15 @@
         }
     </style>
 </head>
+
 <body>
     <!-- Top Bar Controls -->
     <div class="top-bar">
-        <a class="top-bar-btn" href="https://github.com/OWASP-BLT/Github_Sportscaster" target="_blank" rel="noopener noreferrer" title="View on GitHub">
+        <a class="top-bar-btn" href="https://github.com/OWASP-BLT/Github_Sportscaster" target="_blank"
+            rel="noopener noreferrer" title="View on GitHub">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                <path
+                    d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
             </svg>
         </a>
         <button class="top-bar-btn" id="sound-toggle" title="Toggle Sound Effects">🔊</button>
@@ -1189,7 +1269,7 @@
     <!-- Configuration Panel -->
     <div class="config-panel" id="config-panel">
         <h3>⚙️ Configuration</h3>
-        
+
         <div class="config-group">
             <label>Monitoring Scope</label>
             <select id="scope-type">
@@ -1199,12 +1279,12 @@
                 <option value="user">👤 User</option>
             </select>
         </div>
-        
+
         <div class="config-group" id="scope-value-group" style="display: none;">
             <label>Scope Value <small>(e.g., "facebook" or "facebook/react")</small></label>
             <input type="text" id="scope-value" placeholder="Enter org, repo, or username">
         </div>
-        
+
         <div class="config-group">
             <label>Filter by Event Types</label>
             <div class="preset-chips" id="event-type-filters">
@@ -1217,7 +1297,7 @@
                 <span class="preset-chip" data-type="ReleaseEvent">🎉 Release</span>
             </div>
         </div>
-        
+
         <div class="config-group">
             <label>AI Commentary API (OpenAI-compatible)</label>
             <input type="text" id="ai-api-url" placeholder="https://api.openai.com/v1/chat/completions" value="">
@@ -1232,7 +1312,8 @@
                 <span class="status-indicator" id="status-indicator"></span>
                 <span class="status-text" id="status-text">Not configured</span>
             </div>
-            <button class="config-btn test-connection-btn" id="test-connection-btn" type="button">🔌 Test Connection</button>
+            <button class="config-btn test-connection-btn" id="test-connection-btn" type="button">🔌 Test
+                Connection</button>
         </div>
 
         <div class="config-group">
@@ -1244,7 +1325,7 @@
                 <span class="preset-chip" data-preset="devops">🔧 DevOps</span>
             </div>
         </div>
-        
+
         <button class="config-btn" id="apply-config">Apply Configuration</button>
         <button class="config-btn secondary" id="reset-config">Reset to Defaults</button>
     </div>
@@ -1255,7 +1336,7 @@
     </div>
 
     <div class="stats">
-        <span id="event-count">0</span> events processed | 
+        <span id="event-count">0</span> events processed |
         <span id="repo-count">0</span> repositories tracked |
         Last update: <span id="last-update">-</span>
     </div>
@@ -1263,7 +1344,8 @@
     <!-- Channel Filters -->
     <div class="channel-filters" id="channel-filters">
         <span class="channel-filters-label">📺 Channels:</span>
-        <span class="channel-pill active" data-channel="all">All Activity <span class="count" id="all-count">0</span></span>
+        <span class="channel-pill active" data-channel="all">All Activity <span class="count"
+                id="all-count">0</span></span>
         <span class="channel-pill" data-channel="hot">🔥 Hot <span class="count" id="hot-count">0</span></span>
         <span class="channel-pill" data-channel="code">💻 Code <span class="count" id="code-count">0</span></span>
         <span class="channel-pill" data-channel="social">👥 Social <span class="count" id="social-count">0</span></span>
@@ -1274,45 +1356,46 @@
         <div class="robot-container">
             <svg class="robot-svg" viewBox="0 0 100 120" xmlns="http://www.w3.org/2000/svg">
                 <!-- Antenna -->
-                <line x1="50" y1="10" x2="50" y2="25" stroke="#888" stroke-width="3"/>
-                <circle class="antenna-light" cx="50" cy="7" r="5" fill="#ff4444"/>
-                
+                <line x1="50" y1="10" x2="50" y2="25" stroke="#888" stroke-width="3" />
+                <circle class="antenna-light" cx="50" cy="7" r="5" fill="#ff4444" />
+
                 <!-- Head -->
-                <rect x="20" y="25" width="60" height="45" rx="10" fill="#4a5568" stroke="#2d3748" stroke-width="2"/>
-                
+                <rect x="20" y="25" width="60" height="45" rx="10" fill="#4a5568" stroke="#2d3748" stroke-width="2" />
+
                 <!-- Eyes -->
                 <g class="robot-eye">
-                    <circle cx="35" cy="45" r="8" fill="#1a202c"/>
-                    <circle cx="35" cy="45" r="5" fill="#48bb78"/>
-                    <circle cx="37" cy="43" r="2" fill="#fff"/>
+                    <circle cx="35" cy="45" r="8" fill="#1a202c" />
+                    <circle cx="35" cy="45" r="5" fill="#48bb78" />
+                    <circle cx="37" cy="43" r="2" fill="#fff" />
                 </g>
                 <g class="robot-eye">
-                    <circle cx="65" cy="45" r="8" fill="#1a202c"/>
-                    <circle cx="65" cy="45" r="5" fill="#48bb78"/>
-                    <circle cx="67" cy="43" r="2" fill="#fff"/>
+                    <circle cx="65" cy="45" r="8" fill="#1a202c" />
+                    <circle cx="65" cy="45" r="5" fill="#48bb78" />
+                    <circle cx="67" cy="43" r="2" fill="#fff" />
                 </g>
-                
+
                 <!-- Mouth/Speaker -->
                 <g class="robot-mouth">
-                    <rect x="35" y="58" width="30" height="8" rx="2" fill="#1a202c"/>
-                    <line x1="40" y1="62" x2="45" y2="62" stroke="#48bb78" stroke-width="2"/>
-                    <line x1="48" y1="62" x2="53" y2="62" stroke="#48bb78" stroke-width="2"/>
-                    <line x1="56" y1="62" x2="61" y2="62" stroke="#48bb78" stroke-width="2"/>
+                    <rect x="35" y="58" width="30" height="8" rx="2" fill="#1a202c" />
+                    <line x1="40" y1="62" x2="45" y2="62" stroke="#48bb78" stroke-width="2" />
+                    <line x1="48" y1="62" x2="53" y2="62" stroke="#48bb78" stroke-width="2" />
+                    <line x1="56" y1="62" x2="61" y2="62" stroke="#48bb78" stroke-width="2" />
                 </g>
-                
+
                 <!-- Neck -->
-                <rect x="40" y="70" width="20" height="10" fill="#718096"/>
-                
+                <rect x="40" y="70" width="20" height="10" fill="#718096" />
+
                 <!-- Body -->
-                <rect x="15" y="80" width="70" height="35" rx="8" fill="#4a5568" stroke="#2d3748" stroke-width="2"/>
-                
+                <rect x="15" y="80" width="70" height="35" rx="8" fill="#4a5568" stroke="#2d3748" stroke-width="2" />
+
                 <!-- Chest display -->
-                <rect x="30" y="88" width="40" height="20" rx="3" fill="#1a202c"/>
-                <text x="50" y="102" text-anchor="middle" fill="#48bb78" font-size="8" font-family="monospace">LIVE</text>
-                
+                <rect x="30" y="88" width="40" height="20" rx="3" fill="#1a202c" />
+                <text x="50" y="102" text-anchor="middle" fill="#48bb78" font-size="8"
+                    font-family="monospace">LIVE</text>
+
                 <!-- Arms -->
-                <rect x="5" y="82" width="10" height="25" rx="5" fill="#718096"/>
-                <rect x="85" y="82" width="10" height="25" rx="5" fill="#718096"/>
+                <rect x="5" y="82" width="10" height="25" rx="5" fill="#718096" />
+                <rect x="85" y="82" width="10" height="25" rx="5" fill="#718096" />
             </svg>
         </div>
         <div class="tv-screen">
@@ -1374,7 +1457,8 @@
             <span class="speed-value" id="speed-value">10s</span>
             <div class="auto-protect">
                 <input type="checkbox" id="auto-protect" checked>
-                <label for="auto-protect" class="auto-protect-label" title="Automatically slow down when rate limit is low">Auto-protect</label>
+                <label for="auto-protect" class="auto-protect-label"
+                    title="Automatically slow down when rate limit is low">Auto-protect</label>
             </div>
             <span class="rate-protected" id="rate-protected" style="display: none;">⚠️ Throttled</span>
         </div>
@@ -1382,7 +1466,7 @@
 
     <div class="loading pulse" id="loading">Loading GitHub activity...</div>
     <div class="error" id="error" style="display: none;"></div>
-    
+
     <div class="list-container" id="event-list"></div>
 
     <div class="refresh-info">
@@ -1391,4 +1475,5 @@
 
     <script src="sportscaster.js"></script>
 </body>
+
 </html>
