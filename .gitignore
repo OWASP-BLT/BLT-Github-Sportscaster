@@ -1,0 +1,5 @@
+node_modules
+/dist
+.env
+ANALYSIS_AND_RESEARCH.md
+.vite
