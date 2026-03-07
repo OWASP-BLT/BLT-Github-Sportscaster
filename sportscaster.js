@@ -1226,13 +1226,44 @@ class GitHubSportscaster {
 
     generateMockEvent(repoName, eventType) {
         const id = Math.floor(Math.random() * 1000000000) + Date.now();
+        const actorNum = Math.floor(Math.random() * 100);
+        const actor = { login: 'demo-user-' + actorNum, avatar_url: `https://avatars.githubusercontent.com/u/${actorNum + 1000}?v=4` };
+
+        let payload = {};
+        if (eventType === 'PushEvent') {
+            const mockMessages = [
+                'Fix typo in README', 'Add unit tests', 'Update dependencies',
+                'Refactor authentication logic', 'Improve performance', 'Handle edge case in parser'
+            ];
+            const mockAuthors = ['Alice Smith', 'Bob Jones', 'Carol White', 'Dave Brown'];
+            const commitCount = Math.floor(Math.random() * 3) + 1;
+            const commits = [];
+            for (let c = 0; c < commitCount; c++) {
+                const sha = Array.from({ length: 5 }, () => Math.floor(Math.random() * 0x100000000).toString(16).padStart(8, '0')).join('');
+                commits.push({
+                    sha,
+                    message: mockMessages[Math.floor(Math.random() * mockMessages.length)],
+                    author: { name: mockAuthors[Math.floor(Math.random() * mockAuthors.length)], email: 'demo@example.com' },
+                    url: `https://api.github.com/repos/${repoName}/git/commits/${sha}`
+                });
+            }
+            const branches = ['main', 'develop', 'feature/new-ui', 'fix/bug-123'];
+            payload = {
+                ref: `refs/heads/${branches[Math.floor(Math.random() * branches.length)]}`,
+                size: commitCount,
+                before: Array.from({ length: 5 }, () => Math.floor(Math.random() * 0x100000000).toString(16).padStart(8, '0')).join(''),
+                head: commits[commits.length - 1].sha,
+                commits
+            };
+        }
+
         return {
             id: id.toString(),
             repo: { id: Math.floor(Math.random() * 1000000), name: repoName },
             type: eventType,
             created_at: new Date().toISOString(),
-            actor: { login: 'demo-user-' + Math.floor(Math.random() * 100), avatar_url: 'https://github.com/ghost.png' },
-            payload: {}
+            actor,
+            payload
         };
     }
 
@@ -1367,6 +1398,7 @@ class GitHubSportscaster {
                 createdAt: new Date(event.created_at),
                 isNew: true,
                 actor: event.actor ? event.actor.login : 'unknown',
+                actorAvatarUrl: event.actor ? (event.actor.avatar_url || '') : '',
                 payload: event.payload || {}
             };
 
@@ -1606,17 +1638,24 @@ class GitHubSportscaster {
                         const shortSha = commit.sha ? commit.sha.substring(0, 7) : '';
                         const message = commit.message ? commit.message.split('\n')[0] : 'No message';
                         const commitUrl = `${event.repoUrl}/commit/${commit.sha}`;
+                        const authorName = commit.author ? commit.author.name : '';
                         html += '<div class="commit-item">';
                         if (shortSha) {
                             html += `<a href="${this.escapeHtml(commitUrl)}" target="_blank" rel="noopener noreferrer" class="commit-sha">${this.escapeHtml(shortSha)}</a>`;
                         }
                         html += `<span class="commit-message">${this.escapeHtml(message)}</span>`;
+                        if (authorName) {
+                            html += `<span class="commit-author">${this.escapeHtml(authorName)}</span>`;
+                        }
                         html += '</div>';
                     });
                     html += '</div>';
                     if (commits.length > 3) {
                         html += `<div class="commit-more">+ ${commits.length - 3} more commit${commits.length - 3 !== 1 ? 's' : ''}</div>`;
                     }
+                }
+                if (event.filesChanged && event.filesChanged.length > 0) {
+                    html += this.formatFilesChanged(event.filesChanged);
                 }
                 html += '</div>';
                 break;
@@ -1795,7 +1834,7 @@ class GitHubSportscaster {
                 <a href="${this.escapeHtml(event.repoUrl)}" target="_blank" rel="noopener noreferrer">${this.escapeHtml(event.repoName)}</a>
             </div>
             <div class="announcement-time">
-                <span>by ${this.escapeHtml(event.actor)} • ${this.escapeHtml(this.formatTime(event.createdAt))}</span>
+                <span>${event.actorAvatarUrl ? `<img src="${this.escapeHtml(event.actorAvatarUrl)}" alt="" class="actor-avatar actor-avatar-lg" loading="lazy">` : ''}<a href="https://github.com/${this.escapeHtml(event.actor)}" target="_blank" rel="noopener noreferrer" class="actor-link">${this.escapeHtml(event.actor)}</a> • ${this.escapeHtml(this.formatTime(event.createdAt))}</span>
                 <a href="${this.escapeHtml(eventUrl)}" target="_blank" rel="noopener noreferrer" class="view-link"><i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i> View</a>
             </div>
             ${eventDetailsHtml}
@@ -1914,7 +1953,7 @@ class GitHubSportscaster {
                         </div>
                         <div class="event-meta">
                             <span class="event-type">${icon} ${this.escapeHtml(this.formatEventType(event.eventType))}</span>
-                            <span class="event-time">by ${this.escapeHtml(event.actor)} • ${this.escapeHtml(this.formatTime(event.createdAt))}</span>
+                            <span class="event-time">${event.actorAvatarUrl ? `<img src="${this.escapeHtml(event.actorAvatarUrl)}" alt="" class="actor-avatar" loading="lazy">` : ''}<a href="https://github.com/${this.escapeHtml(event.actor)}" target="_blank" rel="noopener noreferrer" class="actor-link">${this.escapeHtml(event.actor)}</a> • ${this.escapeHtml(this.formatTime(event.createdAt))}</span>
                         </div>
                         ${eventDetailsHtml}
                     </div>
@@ -1923,10 +1962,91 @@ class GitHubSportscaster {
             `;
 
             listContainer.appendChild(item);
+
+            if (event.eventType === 'PushEvent' && event.filesChanged === undefined) {
+                this.fetchAndRenderFilesChanged(event, item.id);
+            }
         });
 
         this.newEventIds = new Set();
         this.events.forEach(e => e.isNew = false);
+    }
+
+    async fetchAndRenderFilesChanged(event, cardId) {
+        const payload = event.payload || {};
+        const before = payload.before;
+        const head = payload.head;
+        if (!before || !head || /^0{40}$/.test(before)) {
+            event.filesChanged = null;
+            return;
+        }
+
+        const url = `https://api.github.com/repos/${event.repoName}/compare/${before}...${head}`;
+        try {
+            const headers = { 'Accept': 'application/vnd.github+json' };
+            if (this.githubToken) headers['Authorization'] = `Bearer ${this.githubToken}`;
+            const response = await fetch(url, { headers });
+            if (!response.ok) {
+                event.filesChanged = null;
+                return;
+            }
+            const data = await response.json();
+            event.filesChanged = data.files || [];
+        } catch (e) {
+            event.filesChanged = null;
+            return;
+        }
+
+        if (!event.filesChanged || event.filesChanged.length === 0) return;
+
+        const cardEl = document.getElementById(cardId);
+        if (!cardEl) return;
+
+        const commitInfoEl = cardEl.querySelector('.event-detail-info.commit-info');
+        if (commitInfoEl) {
+            commitInfoEl.insertAdjacentHTML('beforeend', this.formatFilesChanged(event.filesChanged));
+        }
+    }
+
+    formatFilesChanged(files) {
+        if (!files || files.length === 0) return '';
+
+        const totalAdditions = files.reduce((sum, f) => sum + (f.additions || 0), 0);
+        const totalDeletions = files.reduce((sum, f) => sum + (f.deletions || 0), 0);
+        const displayFiles = files.slice(0, 5);
+
+        let html = '<div class="files-changed">';
+        html += '<div class="files-changed-summary">';
+        html += `<i class="fa-solid fa-file-lines event-icon" aria-hidden="true"></i>`;
+        html += ` ${files.length} file${files.length !== 1 ? 's' : ''} changed`;
+        if (totalAdditions > 0) html += ` <span class="files-additions">+${totalAdditions}</span>`;
+        if (totalDeletions > 0) html += ` <span class="files-deletions">-${totalDeletions}</span>`;
+        html += '</div>';
+
+        html += '<div class="files-list">';
+        displayFiles.forEach(file => {
+            const fileStatus = file.status || 'modified';
+            const statusIcon = this.getFileStatusIcon(fileStatus);
+            const statusClass = `files-status-${this.escapeHtml(fileStatus)}`;
+            html += '<div class="files-item">';
+            html += `<span class="files-status ${statusClass}">${statusIcon}</span>`;
+            html += `<span class="files-name">${this.escapeHtml(file.filename || '')}</span>`;
+            if (file.additions !== undefined || file.deletions !== undefined) {
+                html += `<span class="files-diff"><span class="files-additions">+${file.additions || 0}</span> <span class="files-deletions">-${file.deletions || 0}</span></span>`;
+            }
+            html += '</div>';
+        });
+        if (files.length > 5) {
+            html += `<div class="files-more">+ ${files.length - 5} more file${files.length - 5 !== 1 ? 's' : ''}</div>`;
+        }
+        html += '</div>';
+        html += '</div>';
+        return html;
+    }
+
+    getFileStatusIcon(status) {
+        const icons = { added: 'A', removed: 'D', renamed: 'R', copied: 'C' };
+        return icons[status] || 'M';
     }
 }
 

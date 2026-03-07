@@ -1021,6 +1021,110 @@
             margin-top: 0.24rem;
         }
 
+        .commit-author {
+            color: #9ca3af;
+            font-size: 0.68rem;
+            font-style: italic;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .actor-avatar {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            vertical-align: middle;
+            margin-right: 3px;
+            flex-shrink: 0;
+        }
+
+        .actor-avatar-lg {
+            width: 24px;
+            height: 24px;
+        }
+
+        .actor-link {
+            color: #374151;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .actor-link:hover {
+            color: #dc2626;
+            text-decoration: underline;
+        }
+
+        .files-changed {
+            margin-top: 0.35rem;
+            font-size: 0.72rem;
+        }
+
+        .files-changed-summary {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            color: #4b5563;
+            font-weight: 600;
+            margin-bottom: 0.2rem;
+        }
+
+        .files-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.12rem;
+        }
+
+        .files-item {
+            display: flex;
+            align-items: baseline;
+            gap: 0.3rem;
+            color: #374151;
+            overflow-wrap: anywhere;
+        }
+
+        .files-name {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            font-size: 0.7rem;
+            flex: 1;
+        }
+
+        .files-status {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            font-size: 0.65rem;
+            font-weight: 700;
+            width: 1em;
+            text-align: center;
+            flex-shrink: 0;
+        }
+
+        .files-status-added { color: #16a34a; }
+        .files-status-removed { color: #dc2626; }
+        .files-status-renamed { color: #7c3aed; }
+        .files-status-copied { color: #0369a1; }
+        .files-status-modified { color: #d97706; }
+
+        .files-diff {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            font-size: 0.68rem;
+            white-space: nowrap;
+        }
+
+        .files-additions {
+            color: #16a34a;
+            font-weight: 600;
+        }
+
+        .files-deletions {
+            color: #dc2626;
+            font-weight: 600;
+        }
+
+        .files-more {
+            font-size: 0.7rem;
+            color: #6b7280;
+            margin-top: 0.15rem;
+        }
+
         .event-icon,
         .stat-pill-icon,
         .leader-icon,
