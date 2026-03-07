@@ -864,10 +864,20 @@ class GitHubSportscaster {
     setupSoundToggle() {
         const toggleBtn = document.getElementById('sound-toggle');
         if (!toggleBtn) return;
+
+        const renderSoundIcon = (enabled) => {
+            toggleBtn.innerHTML = enabled
+                ? '<i class="fa-solid fa-volume-high" aria-hidden="true"></i>'
+                : '<i class="fa-solid fa-volume-xmark" aria-hidden="true"></i>';
+            toggleBtn.setAttribute('aria-label', enabled ? 'Disable sound effects' : 'Enable sound effects');
+            toggleBtn.classList.toggle('muted', !enabled);
+        };
+
+        renderSoundIcon(this.soundEffects.enabled);
+
         toggleBtn.addEventListener('click', () => {
             const enabled = this.soundEffects.toggle();
-            toggleBtn.textContent = enabled ? '🔊' : '🔇';
-            toggleBtn.classList.toggle('muted', !enabled);
+            renderSoundIcon(enabled);
             // resumeContext is now called inside toggle() for iOS compatibility
         });
     }
@@ -877,6 +887,7 @@ class GitHubSportscaster {
         if (!toggleBtn) return;
         toggleBtn.addEventListener('click', () => {
             const enabled = this.tts.toggle();
+            toggleBtn.setAttribute('aria-pressed', String(enabled));
             toggleBtn.classList.toggle('active', enabled);
             toggleBtn.classList.toggle('disabled', !enabled);
         });
@@ -887,6 +898,7 @@ class GitHubSportscaster {
         if (!toggleBtn) return;
         toggleBtn.addEventListener('click', () => {
             const enabled = this.aiCommentary.toggle();
+            toggleBtn.setAttribute('aria-pressed', String(enabled));
             toggleBtn.classList.toggle('active', enabled);
         });
     }
@@ -1413,14 +1425,24 @@ class GitHubSportscaster {
 
     getEventIcon(eventType) {
         const icons = {
-            PushEvent: '📤', PullRequestEvent: '🔀', IssuesEvent: '🐛',
-            WatchEvent: '⭐', ForkEvent: '🍴', CreateEvent: '✨',
-            DeleteEvent: '🗑️', ReleaseEvent: '🎉', IssueCommentEvent: '💬',
-            CommitCommentEvent: '💭', PullRequestReviewEvent: '👀',
-            PullRequestReviewCommentEvent: '💬', GollumEvent: '📝',
-            MemberEvent: '👥', PublicEvent: '🌐'
+            PushEvent: 'fa-upload',
+            PullRequestEvent: 'fa-code-pull-request',
+            IssuesEvent: 'fa-bug',
+            WatchEvent: 'fa-star',
+            ForkEvent: 'fa-code-fork',
+            CreateEvent: 'fa-wand-magic-sparkles',
+            DeleteEvent: 'fa-trash',
+            ReleaseEvent: 'fa-rocket',
+            IssueCommentEvent: 'fa-comment',
+            CommitCommentEvent: 'fa-comment-dots',
+            PullRequestReviewEvent: 'fa-eye',
+            PullRequestReviewCommentEvent: 'fa-comments',
+            GollumEvent: 'fa-file-lines',
+            MemberEvent: 'fa-users',
+            PublicEvent: 'fa-globe'
         };
-        return icons[eventType] || '📌';
+        const iconClass = icons[eventType] || 'fa-location-pin';
+        return `<i class="fa-solid ${iconClass} event-icon" aria-hidden="true"></i>`;
     }
 
     escapeHtml(text) {
@@ -1456,7 +1478,7 @@ class GitHubSportscaster {
         }
 
         let html = '<div class="commit-info">';
-        html += `<div class="commit-count">📝 ${commitCount} commit${commitCount > 1 ? 's' : ''}</div>`;
+        html += `<div class="commit-count"><i class="fa-solid fa-code-commit event-icon" aria-hidden="true"></i> ${commitCount} commit${commitCount > 1 ? 's' : ''}</div>`;
         
         // Show up to 3 commit messages
         const displayCommits = commits.slice(0, 3);
@@ -1502,16 +1524,16 @@ class GitHubSportscaster {
         const previousRank = this.previousRanks.get(repoName);
         
         if (previousRank === undefined) {
-            return { class: 'new', icon: '🆕', text: 'New' };
+            return { class: 'new', icon: '<i class="fa-solid fa-sparkles trend-icon" aria-hidden="true"></i>', text: 'New' };
         }
         
         if (currentRank < previousRank) {
-            return { class: 'up', icon: '📈', text: `+${previousRank - currentRank}` };
+            return { class: 'up', icon: '<i class="fa-solid fa-arrow-trend-up trend-icon" aria-hidden="true"></i>', text: `+${previousRank - currentRank}` };
         } else if (currentRank > previousRank) {
-            return { class: 'down', icon: '📉', text: `-${currentRank - previousRank}` };
+            return { class: 'down', icon: '<i class="fa-solid fa-arrow-trend-down trend-icon" aria-hidden="true"></i>', text: `-${currentRank - previousRank}` };
         }
         
-        return { class: '', icon: '➡️', text: '—' };
+        return { class: '', icon: '<i class="fa-solid fa-arrow-right trend-icon" aria-hidden="true"></i>', text: '—' };
     }
 
     updateAnnouncement() {
@@ -1535,7 +1557,7 @@ class GitHubSportscaster {
             </div>
             <div class="announcement-time">
                 <span>by ${this.escapeHtml(event.actor)} • ${this.escapeHtml(this.formatTime(event.createdAt))}</span>
-                <a href="${this.escapeHtml(eventUrl)}" target="_blank" rel="noopener noreferrer" class="view-link">🔗 View</a>
+                <a href="${this.escapeHtml(eventUrl)}" target="_blank" rel="noopener noreferrer" class="view-link"><i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i> View</a>
             </div>
             ${commitInfoHtml}
         `;
@@ -1554,23 +1576,29 @@ class GitHubSportscaster {
             const trending = this.getTrendingIndicator(repo.name, rank);
             
             const rankClass = rank === 1 ? 'rank-1' : rank === 2 ? 'rank-2' : rank === 3 ? 'rank-3' : '';
-            const medalEmoji = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : rank;
-            const colorClass = rank === 1 ? 'gold' : rank === 2 ? 'silver' : rank === 3 ? 'bronze' : '';
+            const rankIcon = rank === 1
+                ? '<i class="fa-solid fa-crown leader-icon" aria-hidden="true"></i>'
+                : rank === 2
+                    ? '<i class="fa-solid fa-medal leader-icon" aria-hidden="true"></i>'
+                    : rank === 3
+                        ? '<i class="fa-solid fa-award leader-icon" aria-hidden="true"></i>'
+                        : `<span>${rank}</span>`;
+            const colorClass = rank <= 3 ? 'top-rank' : '';
             
             const item = document.createElement('div');
             item.className = `leaderboard-item ${rankClass}`;
             
             item.innerHTML = `
-                <div class="leaderboard-rank ${colorClass}">${medalEmoji}</div>
+                <div class="leaderboard-rank ${colorClass}">${rankIcon}</div>
                 <div class="leaderboard-repo">
                     <div class="leaderboard-repo-name">
                         <a href="${this.escapeHtml(repo.url)}" target="_blank" rel="noopener noreferrer">${this.escapeHtml(repo.name)}</a>
                     </div>
                 </div>
                 <div class="leaderboard-stats">
-                    <div class="leaderboard-stat">⚡ ${repo.activityScore}</div>
-                    <div class="leaderboard-stat">📊 ${repo.totalEvents}</div>
-                    <div class="leaderboard-stat">👥 ${repo.contributors.size}</div>
+                    <div class="leaderboard-stat"><i class="fa-solid fa-bolt stat-pill-icon" aria-hidden="true"></i> ${repo.activityScore}</div>
+                    <div class="leaderboard-stat"><i class="fa-solid fa-chart-line stat-pill-icon" aria-hidden="true"></i> ${repo.totalEvents}</div>
+                    <div class="leaderboard-stat"><i class="fa-solid fa-users stat-pill-icon" aria-hidden="true"></i> ${repo.contributors.size}</div>
                 </div>
                 ${trending.text !== '—' ? `<div class="leaderboard-change ${trending.class}">${trending.icon} ${trending.text}</div>` : ''}
             `;
@@ -1618,15 +1646,15 @@ class GitHubSportscaster {
                 statsHtml = `
                     <div class="event-stats">
                         <span class="stat-pill" title="Total Events">
-                            <span class="stat-pill-icon">📊</span>
+                            <span class="stat-pill-icon"><i class="fa-solid fa-chart-line" aria-hidden="true"></i></span>
                             <span class="stat-pill-value">${repo.totalEvents}</span>
                         </span>
                         <span class="stat-pill" title="Contributors">
-                            <span class="stat-pill-icon">👥</span>
+                            <span class="stat-pill-icon"><i class="fa-solid fa-users" aria-hidden="true"></i></span>
                             <span class="stat-pill-value">${repo.contributors.size}</span>
                         </span>
                         <span class="stat-pill" title="Activity Score">
-                            <span class="stat-pill-icon">⚡</span>
+                            <span class="stat-pill-icon"><i class="fa-solid fa-bolt" aria-hidden="true"></i></span>
                             <span class="stat-pill-value">${repo.activityScore}</span>
                         </span>
                         <div class="mini-activity-bar" title="Activity Level ${activityPercent}%">
