@@ -63,16 +63,19 @@
 
         .top-bar {
             position: fixed;
-            top: 20px;
-            right: 20px;
+            top: 14px;
+            right: 14px;
             display: flex;
-            gap: 8px;
+            gap: 6px;
             z-index: 1000;
+            flex-wrap: wrap;
+            justify-content: flex-end;
         }
 
         .top-bar-btn {
-            width: 44px;
-            height: 44px;
+            height: 40px;
+            min-width: 40px;
+            padding: 0 0.75rem;
             border-radius: 0.75rem;
             border: 1px solid var(--blt-border);
             background: rgba(255, 255, 255, 0.98);
@@ -80,11 +83,14 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            font-size: 1rem;
+            gap: 0.4rem;
+            font-size: 0.82rem;
+            font-weight: 600;
             transition: all 0.2s ease;
             cursor: pointer;
             text-decoration: none;
             box-shadow: 0 1px 2px rgba(17, 24, 39, 0.08);
+            white-space: nowrap;
         }
 
         .top-bar-btn:hover {
@@ -104,11 +110,16 @@
             opacity: 0.55;
         }
 
+        .top-bar-label {
+            font-size: 0.78rem;
+            font-weight: 600;
+        }
+
         .config-panel {
             position: fixed;
-            top: 76px;
-            right: 20px;
-            width: min(360px, calc(100vw - 40px));
+            top: 66px;
+            right: 14px;
+            width: min(380px, calc(100vw - 28px));
             background: var(--blt-surface);
             border: 1px solid var(--blt-border);
             border-radius: 1rem;
@@ -116,7 +127,7 @@
             box-shadow: 0 18px 40px rgba(17, 24, 39, 0.18);
             z-index: 999;
             display: none;
-            max-height: calc(100vh - 110px);
+            max-height: calc(100vh - 80px);
             overflow-y: auto;
         }
 
@@ -1076,8 +1087,8 @@
 
         @media (max-width: 768px) {
             .top-bar {
-                top: 12px;
-                right: 12px;
+                top: 8px;
+                right: 8px;
             }
 
             .sportscaster-section {
@@ -1101,30 +1112,93 @@
         }
 
         @media (max-width: 600px) {
-            .top-bar-btn {
-                width: 40px;
-                height: 40px;
+            .top-bar-label {
+                display: none;
             }
+            .top-bar-btn {
+                padding: 0 0.5rem;
+            }
+        }
+
+        /* Event detail info (PR title, issue title, release name, etc.) */
+        .event-detail-info {
+            margin-top: 0.4rem;
+            border-left: 2px solid #fee2e2;
+            padding-left: 0.55rem;
+            font-size: 0.82rem;
+        }
+
+        .event-detail-action {
+            display: inline-block;
+            color: #6b7280;
+            font-size: 0.72rem;
+            font-weight: 600;
+            text-transform: capitalize;
+            margin-right: 0.3rem;
+            margin-bottom: 0.15rem;
+        }
+
+        .event-detail-title {
+            color: #111827;
+            font-weight: 600;
+            font-size: 0.82rem;
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+
+        .event-detail-title:hover {
+            color: var(--blt-primary);
+            text-decoration: underline;
+        }
+
+        .event-detail-ref {
+            display: inline-block;
+            background: #f3f4f6;
+            border: 1px solid #e5e7eb;
+            border-radius: 4px;
+            padding: 0.1rem 0.4rem;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            font-size: 0.72rem;
+            color: #374151;
+            margin-left: 0.2rem;
+        }
+
+        .event-detail-body {
+            color: #4b5563;
+            font-size: 0.75rem;
+            line-height: 1.4;
+            margin-top: 0.2rem;
+            font-style: italic;
+            word-break: break-word;
         }
     </style>
 </head>
 <body class="font-sans text-gray-900 antialiased">
     <!-- Top Bar Controls -->
     <div class="top-bar">
+        <a class="top-bar-btn" href="landing.html" title="About this tool">
+            <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
+            <span class="top-bar-label">About</span>
+        </a>
         <a class="top-bar-btn" href="https://github.com/OWASP-BLT/Github_Sportscaster" target="_blank" rel="noopener noreferrer" title="View on GitHub">
             <i class="fa-brands fa-github" aria-hidden="true"></i>
+            <span class="top-bar-label">GitHub</span>
         </a>
         <button class="top-bar-btn" id="sound-toggle" title="Toggle Sound Effects" type="button" aria-label="Toggle sound effects">
-            <i class="fa-solid fa-volume-high" aria-hidden="true"></i>
+            <i class="fa-solid fa-volume-high" id="sound-icon" aria-hidden="true"></i>
+            <span class="top-bar-label" id="sound-label">Sound</span>
         </button>
         <button class="top-bar-btn" id="tts-toggle" title="Toggle Text-to-Speech" type="button" aria-label="Toggle text-to-speech">
             <i class="fa-solid fa-microphone-lines" aria-hidden="true"></i>
+            <span class="top-bar-label">Voice</span>
         </button>
         <button class="top-bar-btn" id="ai-toggle" title="Toggle AI Commentary" type="button" aria-label="Toggle AI commentary">
             <i class="fa-solid fa-robot" aria-hidden="true"></i>
+            <span class="top-bar-label">AI</span>
         </button>
         <button class="top-bar-btn" id="config-toggle" title="Settings" type="button" aria-label="Open settings">
             <i class="fa-solid fa-sliders" aria-hidden="true"></i>
+            <span class="top-bar-label">Settings</span>
         </button>
     </div>
 
@@ -1151,6 +1225,21 @@
                 <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
                 <input type="text" id="scope-value" placeholder="Enter org, repo, or username">
             </div>
+        </div>
+
+        <div class="config-group">
+            <label for="github-token">
+                GitHub Token
+                <small class="text-gray-500">(optional — raises rate limit to 5000/hr)</small>
+            </label>
+            <div class="input-with-icon">
+                <i class="fa-brands fa-github" aria-hidden="true"></i>
+                <input type="password" id="github-token" placeholder="ghp_xxxxxxxxxxxx (stored locally)" autocomplete="off">
+            </div>
+            <p style="font-size:0.72rem;color:#6b7280;margin-top:0.3rem;">
+                <i class="fa-solid fa-triangle-exclamation" style="color:#b45309;" aria-hidden="true"></i>
+                Use a fine-grained token with read-only public repo access. Stored in browser localStorage.
+            </p>
         </div>
 
         <div class="config-group">
@@ -1196,6 +1285,17 @@
             </div>
         </div>
 
+        <div class="config-group">
+            <label for="volume-slider">
+                Sound Volume: <strong id="volume-display">50%</strong>
+            </label>
+            <div style="display:flex;align-items:center;gap:0.5rem;margin-top:0.3rem;">
+                <i class="fa-solid fa-volume-low text-gray-400" aria-hidden="true"></i>
+                <input type="range" class="speed-slider" id="volume-slider" min="0" max="100" value="50" step="5" style="flex:1;">
+                <i class="fa-solid fa-volume-high text-gray-400" aria-hidden="true"></i>
+            </div>
+        </div>
+
         <button class="config-btn" id="apply-config" type="button">
             <i class="fa-solid fa-check" aria-hidden="true"></i>
             Apply Configuration
@@ -1206,79 +1306,7 @@
         </button>
     </div>
 
-    <main class="pt-24 pb-6">
-        <section class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 mb-10">
-            <div class="rounded-2xl border border-neutral-border bg-white p-6 sm:p-10 shadow-sm">
-                <p class="inline-flex items-center gap-2 rounded-full bg-red-50 text-red-700 border border-red-100 px-3 py-1 text-xs font-bold tracking-wide uppercase">
-                    <i class="fa-solid fa-bolt" aria-hidden="true"></i>
-                    OWASP BLT Extension
-                </p>
-                <h1 class="mt-4 text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-gray-900">
-                    BLT GitHub Sportscaster
-                </h1>
-                <p class="mt-4 text-base sm:text-lg leading-relaxed text-gray-600 max-w-3xl">
-                    Real-time GitHub event intelligence with a live sportscaster feed, ranked activity leaderboard,
-                    AI commentary, and practical controls for monitoring the repos and communities that matter to you.
-                </p>
-                <div class="mt-6 flex flex-wrap items-center gap-3">
-                    <a href="#live-dashboard" class="btn-primary !w-auto px-5 py-3 rounded-lg text-sm font-semibold inline-flex items-center">
-                        <i class="fa-solid fa-tower-broadcast" aria-hidden="true"></i>
-                        Watch Live Dashboard
-                    </a>
-                    <a href="https://github.com/OWASP-BLT/Github_Sportscaster" target="_blank" rel="noopener noreferrer" class="btn-outline !w-auto px-5 py-3 rounded-lg text-sm font-semibold inline-flex items-center">
-                        <i class="fa-brands fa-github" aria-hidden="true"></i>
-                        View Source
-                    </a>
-                </div>
-            </div>
-        </section>
-
-        <section class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 mb-8" aria-label="Feature highlights">
-            <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                <article class="rounded-xl border border-neutral-border bg-white p-5 shadow-sm">
-                    <h2 class="text-sm font-extrabold text-gray-900 inline-flex items-center gap-2"><i class="fa-solid fa-wave-square text-red-600" aria-hidden="true"></i>Live Event Stream</h2>
-                    <p class="mt-2 text-sm text-gray-600">Tracks GitHub public activity in real-time with configurable scope for global, org, repo, or user views.</p>
-                </article>
-                <article class="rounded-xl border border-neutral-border bg-white p-5 shadow-sm">
-                    <h2 class="text-sm font-extrabold text-gray-900 inline-flex items-center gap-2"><i class="fa-solid fa-ranking-star text-red-600" aria-hidden="true"></i>Ranked Leaderboard</h2>
-                    <p class="mt-2 text-sm text-gray-600">Weighted activity scoring surfaces trending repositories and contributor momentum as it happens.</p>
-                </article>
-                <article class="rounded-xl border border-neutral-border bg-white p-5 shadow-sm">
-                    <h2 class="text-sm font-extrabold text-gray-900 inline-flex items-center gap-2"><i class="fa-solid fa-robot text-red-600" aria-hidden="true"></i>AI Commentary</h2>
-                    <p class="mt-2 text-sm text-gray-600">Pluggable OpenAI-compatible narration adds play-by-play context with fallback templates when AI is unavailable.</p>
-                </article>
-                <article class="rounded-xl border border-neutral-border bg-white p-5 shadow-sm">
-                    <h2 class="text-sm font-extrabold text-gray-900 inline-flex items-center gap-2"><i class="fa-solid fa-filter text-red-600" aria-hidden="true"></i>Channel Filters</h2>
-                    <p class="mt-2 text-sm text-gray-600">Quickly focus on hot, code, social, or all activity channels for cleaner monitoring during triage and demos.</p>
-                </article>
-                <article class="rounded-xl border border-neutral-border bg-white p-5 shadow-sm">
-                    <h2 class="text-sm font-extrabold text-gray-900 inline-flex items-center gap-2"><i class="fa-solid fa-gauge-high text-red-600" aria-hidden="true"></i>Rate-Safe Polling</h2>
-                    <p class="mt-2 text-sm text-gray-600">Countdown, progress bar, and auto-protect throttling help stay within GitHub API limits while remaining responsive.</p>
-                </article>
-                <article class="rounded-xl border border-neutral-border bg-white p-5 shadow-sm">
-                    <h2 class="text-sm font-extrabold text-gray-900 inline-flex items-center gap-2"><i class="fa-solid fa-volume-high text-red-600" aria-hidden="true"></i>Audio Controls</h2>
-                    <p class="mt-2 text-sm text-gray-600">Independent sound-effects and text-to-speech toggles make it usable in both ambient screens and quiet workflows.</p>
-                </article>
-            </div>
-        </section>
-
-        <section class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 mb-8">
-            <div class="grid gap-4 lg:grid-cols-3">
-                <article class="rounded-xl border border-neutral-border bg-white p-5 shadow-sm">
-                    <p class="text-xs font-bold uppercase tracking-wide text-red-700">Why it helps</p>
-                    <p class="mt-2 text-sm text-gray-600">Teams get a single live board for engineering momentum, community signals, and release cadence.</p>
-                </article>
-                <article class="rounded-xl border border-neutral-border bg-white p-5 shadow-sm">
-                    <p class="text-xs font-bold uppercase tracking-wide text-red-700">How to use</p>
-                    <p class="mt-2 text-sm text-gray-600">Pick scope and filters in Settings, tune refresh speed, then watch leaderboard shifts and commentary.</p>
-                </article>
-                <article class="rounded-xl border border-neutral-border bg-white p-5 shadow-sm">
-                    <p class="text-xs font-bold uppercase tracking-wide text-red-700">Where it fits</p>
-                    <p class="mt-2 text-sm text-gray-600">Works well for demo walls, hackathons, community ops, and rapid OSS ecosystem monitoring.</p>
-                </article>
-            </div>
-        </section>
-
+    <main class="pt-16 pb-6">
         <section id="live-dashboard" class="dashboard-shell" aria-label="Live sportscaster dashboard">
             <div class="header">
                 <h1><i class="fa-solid fa-microphone-lines text-red-600" aria-hidden="true"></i> Live GitHub Sportscaster</h1>

@@ -4,6 +4,7 @@ class SoundEffects {
     constructor() {
         this.audioContext = null;
         this.enabled = true;
+        this.volume = parseFloat(localStorage.getItem('sound_volume') ?? '0.5');
         this.isUnlocked = false;
         this.isIOS = this.detectIOS();
         this.initAudioContext();
@@ -117,11 +118,21 @@ class SoundEffects {
         oscillator.type = type;
         oscillator.frequency.setValueAtTime(frequency, this.audioContext.currentTime);
         
-        gainNode.gain.setValueAtTime(volume, this.audioContext.currentTime);
+        const scaledVolume = volume * this.volume;
+        gainNode.gain.setValueAtTime(scaledVolume, this.audioContext.currentTime);
         gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + duration);
         
         oscillator.start(this.audioContext.currentTime);
         oscillator.stop(this.audioContext.currentTime + duration);
+    }
+
+    /**
+     * Sets the master volume and persists it to localStorage
+     * @param {number} value - Volume level between 0 and 1
+     */
+    setVolume(value) {
+        this.volume = Math.max(0, Math.min(1, value));
+        localStorage.setItem('sound_volume', String(this.volume));
     }
 
     playPushEvent() {
@@ -811,6 +822,7 @@ class GitHubSportscaster {
         this.scopeType = localStorage.getItem('scope_type') || 'global';
         this.scopeValue = localStorage.getItem('scope_value') || '';
         this.eventTypeFilter = localStorage.getItem('event_type_filter') || 'all';
+        this.githubToken = localStorage.getItem('github_token') || '';
         
         const scopeTypeEl = document.getElementById('scope-type');
         const scopeValueEl = document.getElementById('scope-value');
@@ -827,6 +839,11 @@ class GitHubSportscaster {
         localStorage.setItem('scope_type', this.scopeType);
         localStorage.setItem('scope_value', this.scopeValue);
         localStorage.setItem('event_type_filter', this.eventTypeFilter);
+        if (this.githubToken) {
+            localStorage.setItem('github_token', this.githubToken);
+        } else {
+            localStorage.removeItem('github_token');
+        }
     }
 
     async init() {
@@ -837,6 +854,7 @@ class GitHubSportscaster {
         this.setupConfigPanel();
         this.setupChannelFilters();
         this.setupSpeedControl();
+        this.setupVolumeControl();
         this.startCountdown();
         await this.fetchActivity();
         this.startFetchInterval();
@@ -866,9 +884,12 @@ class GitHubSportscaster {
         if (!toggleBtn) return;
 
         const renderSoundIcon = (enabled) => {
-            toggleBtn.innerHTML = enabled
-                ? '<i class="fa-solid fa-volume-high" aria-hidden="true"></i>'
-                : '<i class="fa-solid fa-volume-xmark" aria-hidden="true"></i>';
+            const iconEl = document.getElementById('sound-icon');
+            if (iconEl) {
+                iconEl.className = enabled
+                    ? 'fa-solid fa-volume-high'
+                    : 'fa-solid fa-volume-xmark';
+            }
             toggleBtn.setAttribute('aria-label', enabled ? 'Disable sound effects' : 'Enable sound effects');
             toggleBtn.classList.toggle('muted', !enabled);
         };
@@ -878,7 +899,6 @@ class GitHubSportscaster {
         toggleBtn.addEventListener('click', () => {
             const enabled = this.soundEffects.toggle();
             renderSoundIcon(enabled);
-            // resumeContext is now called inside toggle() for iOS compatibility
         });
     }
 
@@ -953,6 +973,18 @@ class GitHubSportscaster {
                 const scopeValueEl = document.getElementById('scope-value');
                 this.scopeValue = scopeValueEl ? scopeValueEl.value : '';
                 
+                const githubTokenEl = document.getElementById('github-token');
+                if (githubTokenEl) {
+                    const tokenVal = githubTokenEl.value.trim();
+                    // Accept blank (no token) or common GitHub token formats: ghp_, gho_, github_pat_, or 40-char classic tokens
+                    if (tokenVal === '' || /^(ghp_|gho_|github_pat_)[a-zA-Z0-9_]+$/.test(tokenVal) || /^[a-fA-F0-9]{40}$/.test(tokenVal)) {
+                        this.githubToken = tokenVal;
+                    } else {
+                        this.githubToken = '';
+                        githubTokenEl.value = '';
+                    }
+                }
+                
                 const apiUrlEl = document.getElementById('ai-api-url');
                 const apiKeyEl = document.getElementById('ai-api-key');
                 const modelEl = document.getElementById('ai-model');
@@ -974,10 +1006,13 @@ class GitHubSportscaster {
                 this.scopeType = 'global';
                 this.scopeValue = '';
                 this.eventTypeFilter = 'all';
+                this.githubToken = '';
                 if (scopeType) scopeType.value = 'global';
                 const scopeValueEl = document.getElementById('scope-value');
                 if (scopeValueEl) scopeValueEl.value = '';
                 if (scopeValueGroup) scopeValueGroup.style.display = 'none';
+                const githubTokenEl = document.getElementById('github-token');
+                if (githubTokenEl) githubTokenEl.value = '';
                 document.querySelectorAll('#event-type-filters .preset-chip').forEach(c => c.classList.remove('active'));
                 const allChip = document.querySelector('#event-type-filters .preset-chip[data-type="all"]');
                 if (allChip) allChip.classList.add('active');
@@ -998,9 +1033,11 @@ class GitHubSportscaster {
         const apiUrlEl = document.getElementById('ai-api-url');
         const apiKeyEl = document.getElementById('ai-api-key');
         const modelEl = document.getElementById('ai-model');
+        const githubTokenEl = document.getElementById('github-token');
         if (apiUrlEl) apiUrlEl.value = this.aiCommentary.apiUrl;
         if (apiKeyEl) apiKeyEl.value = this.aiCommentary.apiKey;
         if (modelEl) modelEl.value = this.aiCommentary.model;
+        if (githubTokenEl) githubTokenEl.value = this.githubToken;
         
         // Initialize connection status display
         this.aiCommentary.initConnectionStatus();
@@ -1049,6 +1086,24 @@ class GitHubSportscaster {
                 }
             });
         }
+    }
+
+    setupVolumeControl() {
+        const slider = document.getElementById('volume-slider');
+        const display = document.getElementById('volume-display');
+        
+        if (!slider) return;
+        
+        // Sync slider to current volume
+        const pct = Math.round(this.soundEffects.volume * 100);
+        slider.value = pct;
+        if (display) display.textContent = `${pct}%`;
+        
+        slider.addEventListener('input', () => {
+            const val = parseInt(slider.value, 10) / 100;
+            this.soundEffects.setVolume(val);
+            if (display) display.textContent = `${slider.value}%`;
+        });
     }
 
     resetData() {
@@ -1225,6 +1280,7 @@ class GitHubSportscaster {
                 const headers = {};
                 if (this.etag) headers['If-None-Match'] = this.etag;
                 if (this.lastModified) headers['If-Modified-Since'] = this.lastModified;
+                if (this.githubToken) headers['Authorization'] = `Bearer ${this.githubToken}`;
                 
                 const response = await fetch(this.getApiUrl(), { headers });
                 
@@ -1520,6 +1576,189 @@ class GitHubSportscaster {
         }
     }
 
+    /**
+     * Returns HTML showing rich event details — PR title, issue title, release name,
+     * branch/ref for creates, commit messages for pushes, etc.
+     * @param {Object} event - Processed event object
+     * @returns {string} HTML string
+     */
+    formatEventDetails(event) {
+        const payload = event.payload || {};
+        let html = '';
+
+        switch (event.eventType) {
+            case 'PushEvent': {
+                const commits = payload.commits || [];
+                const commitCount = payload.size || commits.length;
+                if (commitCount === 0) break;
+
+                const branch = payload.ref ? payload.ref.replace('refs/heads/', '') : '';
+                html = '<div class="event-detail-info commit-info">';
+                if (branch) {
+                    html += `<div class="commit-count"><i class="fa-solid fa-code-branch event-icon" aria-hidden="true"></i> <span class="event-detail-ref">${this.escapeHtml(branch)}</span> — ${commitCount} commit${commitCount !== 1 ? 's' : ''}</div>`;
+                } else {
+                    html += `<div class="commit-count"><i class="fa-solid fa-code-commit event-icon" aria-hidden="true"></i> ${commitCount} commit${commitCount !== 1 ? 's' : ''}</div>`;
+                }
+                const displayCommits = commits.slice(0, 3);
+                if (displayCommits.length > 0) {
+                    html += '<div class="commit-list">';
+                    displayCommits.forEach(commit => {
+                        const shortSha = commit.sha ? commit.sha.substring(0, 7) : '';
+                        const message = commit.message ? commit.message.split('\n')[0] : 'No message';
+                        const commitUrl = `${event.repoUrl}/commit/${commit.sha}`;
+                        html += '<div class="commit-item">';
+                        if (shortSha) {
+                            html += `<a href="${this.escapeHtml(commitUrl)}" target="_blank" rel="noopener noreferrer" class="commit-sha">${this.escapeHtml(shortSha)}</a>`;
+                        }
+                        html += `<span class="commit-message">${this.escapeHtml(message)}</span>`;
+                        html += '</div>';
+                    });
+                    html += '</div>';
+                    if (commits.length > 3) {
+                        html += `<div class="commit-more">+ ${commits.length - 3} more commit${commits.length - 3 !== 1 ? 's' : ''}</div>`;
+                    }
+                }
+                html += '</div>';
+                break;
+            }
+            case 'PullRequestEvent': {
+                const pr = payload.pull_request;
+                if (!pr) break;
+                const action = payload.action || 'updated';
+                const prUrl = pr.html_url || `${event.repoUrl}/pull/${pr.number}`;
+                const bodySnippet = pr.body ? pr.body.trim().substring(0, 120) : '';
+                html = `<div class="event-detail-info">
+                    <span class="event-detail-action">${this.escapeHtml(action)}</span>
+                    <a href="${this.escapeHtml(prUrl)}" target="_blank" rel="noopener noreferrer" class="event-detail-title">#${pr.number} ${this.escapeHtml(pr.title || '')}</a>
+                    ${bodySnippet ? `<div class="event-detail-body">${this.escapeHtml(bodySnippet)}${pr.body.trim().length > 120 ? '…' : ''}</div>` : ''}
+                </div>`;
+                break;
+            }
+            case 'IssuesEvent': {
+                const issue = payload.issue;
+                if (!issue) break;
+                const action = payload.action || 'updated';
+                const issueUrl = issue.html_url || `${event.repoUrl}/issues/${issue.number}`;
+                html = `<div class="event-detail-info">
+                    <span class="event-detail-action">${this.escapeHtml(action)}</span>
+                    <a href="${this.escapeHtml(issueUrl)}" target="_blank" rel="noopener noreferrer" class="event-detail-title">#${issue.number} ${this.escapeHtml(issue.title || '')}</a>
+                </div>`;
+                break;
+            }
+            case 'IssueCommentEvent': {
+                const issue = payload.issue;
+                const comment = payload.comment;
+                if (!issue) break;
+                const issueUrl = issue.html_url || `${event.repoUrl}/issues/${issue.number}`;
+                const commentSnippet = comment && comment.body ? comment.body.trim().substring(0, 120) : '';
+                html = `<div class="event-detail-info">
+                    <a href="${this.escapeHtml(issueUrl)}" target="_blank" rel="noopener noreferrer" class="event-detail-title">#${issue.number} ${this.escapeHtml(issue.title || '')}</a>
+                    ${commentSnippet ? `<div class="event-detail-body">${this.escapeHtml(commentSnippet)}${comment.body.trim().length > 120 ? '…' : ''}</div>` : ''}
+                </div>`;
+                break;
+            }
+            case 'PullRequestReviewEvent':
+            case 'PullRequestReviewCommentEvent': {
+                const pr = payload.pull_request;
+                const comment = payload.comment || payload.review;
+                if (!pr) break;
+                const prUrl = pr.html_url || `${event.repoUrl}/pull/${pr.number}`;
+                const commentSnippet = comment && comment.body ? comment.body.trim().substring(0, 120) : '';
+                html = `<div class="event-detail-info">
+                    <a href="${this.escapeHtml(prUrl)}" target="_blank" rel="noopener noreferrer" class="event-detail-title">#${pr.number} ${this.escapeHtml(pr.title || '')}</a>
+                    ${commentSnippet ? `<div class="event-detail-body">${this.escapeHtml(commentSnippet)}${comment.body.trim().length > 120 ? '…' : ''}</div>` : ''}
+                </div>`;
+                break;
+            }
+            case 'CommitCommentEvent': {
+                const comment = payload.comment;
+                if (!comment) break;
+                const commentSnippet = comment.body ? comment.body.trim().substring(0, 120) : '';
+                const commentUrl = comment.html_url || event.repoUrl;
+                html = `<div class="event-detail-info">
+                    <a href="${this.escapeHtml(commentUrl)}" target="_blank" rel="noopener noreferrer" class="event-detail-title">
+                        <i class="fa-solid fa-comment-dots" aria-hidden="true"></i> Commit comment
+                    </a>
+                    ${commentSnippet ? `<div class="event-detail-body">${this.escapeHtml(commentSnippet)}${comment.body.trim().length > 120 ? '…' : ''}</div>` : ''}
+                </div>`;
+                break;
+            }
+            case 'ReleaseEvent': {
+                const release = payload.release;
+                if (!release) break;
+                const releaseName = release.name || release.tag_name || '';
+                const releaseUrl = release.html_url || `${event.repoUrl}/releases`;
+                const releaseSnippet = release.body ? release.body.trim().substring(0, 120) : '';
+                html = `<div class="event-detail-info">
+                    <a href="${this.escapeHtml(releaseUrl)}" target="_blank" rel="noopener noreferrer" class="event-detail-title">🚀 ${this.escapeHtml(releaseName)}</a>
+                    ${releaseSnippet ? `<div class="event-detail-body">${this.escapeHtml(releaseSnippet)}${release.body.trim().length > 120 ? '…' : ''}</div>` : ''}
+                </div>`;
+                break;
+            }
+            case 'CreateEvent': {
+                const refType = payload.ref_type || 'repository';
+                const ref = payload.ref || '';
+                const description = payload.description || '';
+                html = `<div class="event-detail-info">
+                    <span class="event-detail-action">Created ${this.escapeHtml(refType)}</span>
+                    ${ref ? `<span class="event-detail-ref">${this.escapeHtml(ref)}</span>` : ''}
+                    ${description ? `<div class="event-detail-body">${this.escapeHtml(description.substring(0, 120))}${description.length > 120 ? '…' : ''}</div>` : ''}
+                </div>`;
+                break;
+            }
+            case 'DeleteEvent': {
+                const refType = payload.ref_type || '';
+                const ref = payload.ref || '';
+                html = `<div class="event-detail-info">
+                    <span class="event-detail-action">Deleted ${this.escapeHtml(refType)}</span>
+                    ${ref ? `<span class="event-detail-ref">${this.escapeHtml(ref)}</span>` : ''}
+                </div>`;
+                break;
+            }
+            case 'ForkEvent': {
+                const forkee = payload.forkee;
+                if (!forkee) break;
+                const forkUrl = forkee.html_url || `https://github.com/${forkee.full_name}`;
+                html = `<div class="event-detail-info">
+                    <span class="event-detail-action">Forked to</span>
+                    <a href="${this.escapeHtml(forkUrl)}" target="_blank" rel="noopener noreferrer" class="event-detail-title">${this.escapeHtml(forkee.full_name || '')}</a>
+                </div>`;
+                break;
+            }
+            case 'WatchEvent': {
+                html = `<div class="event-detail-info">
+                    <span class="event-detail-action">⭐ starred this repository</span>
+                </div>`;
+                break;
+            }
+            case 'MemberEvent': {
+                const member = payload.member;
+                const action = payload.action || '';
+                if (!member) break;
+                html = `<div class="event-detail-info">
+                    <span class="event-detail-action">${this.escapeHtml(action)} collaborator</span>
+                    <span class="event-detail-title">${this.escapeHtml(member.login || '')}</span>
+                </div>`;
+                break;
+            }
+            case 'GollumEvent': {
+                const pages = payload.pages || [];
+                if (pages.length === 0) break;
+                html = `<div class="event-detail-info">
+                    <span class="event-detail-action">Wiki:</span>
+                    ${pages.slice(0, 2).map(p =>
+                        `<a href="${this.escapeHtml(p.html_url || event.repoUrl)}" target="_blank" rel="noopener noreferrer" class="event-detail-title">${this.escapeHtml(p.page_name || '')} (${this.escapeHtml(p.action || '')})</a>`
+                    ).join(' · ')}
+                </div>`;
+                break;
+            }
+            default:
+                break;
+        }
+
+        return html;
+    }
+
     getTrendingIndicator(repoName, currentRank) {
         const previousRank = this.previousRanks.get(repoName);
         
@@ -1548,7 +1787,7 @@ class GitHubSportscaster {
         const event = this.latestEvent;
         const icon = this.getEventIcon(event.eventType);
         const eventUrl = this.getEventUrl(event);
-        const commitInfoHtml = this.formatCommitInfo(event);
+        const eventDetailsHtml = this.formatEventDetails(event);
         
         announcementDiv.innerHTML = `
             <div class="announcement-event-type">${icon} ${this.escapeHtml(this.formatEventType(event.eventType))}</div>
@@ -1559,7 +1798,7 @@ class GitHubSportscaster {
                 <span>by ${this.escapeHtml(event.actor)} • ${this.escapeHtml(this.formatTime(event.createdAt))}</span>
                 <a href="${this.escapeHtml(eventUrl)}" target="_blank" rel="noopener noreferrer" class="view-link"><i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i> View</a>
             </div>
-            ${commitInfoHtml}
+            ${eventDetailsHtml}
         `;
     }
 
@@ -1664,7 +1903,7 @@ class GitHubSportscaster {
                 `;
             }
 
-            const commitInfoHtml = this.formatCommitInfo(event);
+            const eventDetailsHtml = this.formatEventDetails(event);
             
             item.innerHTML = `
                 <div class="event-item-row">
@@ -1677,7 +1916,7 @@ class GitHubSportscaster {
                             <span class="event-type">${icon} ${this.escapeHtml(this.formatEventType(event.eventType))}</span>
                             <span class="event-time">by ${this.escapeHtml(event.actor)} • ${this.escapeHtml(this.formatTime(event.createdAt))}</span>
                         </div>
-                        ${commitInfoHtml}
+                        ${eventDetailsHtml}
                     </div>
                     ${statsHtml}
                 </div>
